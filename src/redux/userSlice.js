@@ -14,12 +14,21 @@ export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    doLoginAction: (state, action) => {
+    doLoginAction: (state) => {
       state.isAuthenticated = true;
-      state.user = action.payload;
+    },
+    doGetProfileAction: (state, action) => {
+      const { id, displayName, email, role } = action.payload;
+      state.user = { id, name: displayName, email, role };
+      state.isAuthenticated = true;
+    },
+    doLogoutAction: (state) => {
+      state.isAuthenticated = false;
+      state.user = initialState.user; // Reset user data
     },
   },
 });
 
-export const { doLoginAction } = userSlice.actions;
+export const { doLoginAction, doGetProfileAction, doLogoutAction } =
+  userSlice.actions;
 export default userSlice.reducer;

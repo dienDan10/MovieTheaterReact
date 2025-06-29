@@ -9,7 +9,11 @@ function PageNotFound() {
       title="404"
       subTitle="Sorry, the page you visited does not exist."
       style={{ marginTop: 100 }}
-      extra={<Button type="primary" onClick={() => navigate("/")} />}
+      extra={
+        <Button type="primary" onClick={() => navigate("/")}>
+          Go To Home
+        </Button>
+      }
     />
   );
 }

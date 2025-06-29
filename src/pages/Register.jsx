@@ -64,22 +64,6 @@ function Register() {
             </Form.Item>
 
             <Form.Item
-              name="fullName"
-              rules={[
-                { required: true, message: "Please input your full name!" },
-                {
-                  min: 2,
-                  message: "Full name must be at least 2 characters long!",
-                },
-              ]}
-            >
-              <Input
-                prefix={<FaUserCheck className="text-slate-700 mx-2" />}
-                placeholder="Full Name"
-              />
-            </Form.Item>
-
-            <Form.Item
               name="email"
               rules={[
                 { required: true, message: "Please input your email!" },
@@ -92,23 +76,6 @@ function Register() {
               <Input
                 prefix={<FaEnvelope className="text-slate-700 mx-2" />}
                 placeholder="Email"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="phoneNumber"
-              rules={[
-                { required: true, message: "Please input your phone number!" },
-                {
-                  pattern: /^[0-9]{10,}$/,
-                  message:
-                    "Please enter a valid phone number with at least 10 digits!",
-                },
-              ]}
-            >
-              <Input
-                prefix={<FaPhone className="text-slate-700 mx-2" />}
-                placeholder="Phone Number"
               />
             </Form.Item>
 

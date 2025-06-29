@@ -1,1 +1,85 @@
 @import "tailwindcss";
+
+/* CSS FOR ADMIN SIDE NAVIGATOR */
+
+.ant-menu-item {
+  color: #f3f6fc !important;
+  background-color: oklch(21% 0.034 264.665);
+}
+
+.ant-menu-item:hover {
+  color: #13243e !important;
+  background-color: #f3f6fc !important;
+}
+
+.ant-menu-item-selected {
+  color: #13243e !important;
+  background-color: #f3f6fc !important;
+}
+
+/* CSS FOR IMAGE SLIDER */
+.slick-slider {
+  position: relative;
+}
+
+/* Custom dots styling */
+.custom-dots {
+  position: absolute;
+  bottom: 5px;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  z-index: 20;
+}
+
+.custom-dots li {
+  margin-left: 6px;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.custom-dots li button {
+  height: 12px !important;
+  width: 12px !important;
+  cursor: pointer;
+  border-radius: 50%; /* Circular dots */
+  border: 0;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.4
+  ) !important; /* Very transparent white */
+  padding: 0;
+  font-size: 0;
+  line-height: 0;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.custom-dots li button:hover,
+.custom-dots li button:focus {
+  outline: none;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  ); /* Slightly more visible on hover */
+}
+
+.custom-dots li button:before {
+  display: none;
+}
+
+.custom-dots li.slick-active button {
+  background-color: #ffffff !important; /* Solid white for active dot */
+}
+
+/* Hide default arrows */
+.slick-arrow:before {
+  display: none;
+}

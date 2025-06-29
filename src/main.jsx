@@ -22,16 +22,16 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools
-        initialIsOpen={false}
-        buttonPosition="bottom-left"
-        position="left"
-      />
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </QueryClientProvider>
-  </StrictMode>
+  //<StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <ReactQueryDevtools
+      initialIsOpen={false}
+      buttonPosition="bottom-left"
+      position="left"
+    />
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </QueryClientProvider>
+  // </StrictMode>
 );

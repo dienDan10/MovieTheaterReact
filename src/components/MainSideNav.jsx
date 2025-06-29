@@ -1,5 +1,5 @@
 import { Avatar, Drawer, Space } from "antd";
-import { FaRegUser, FaXmark } from "react-icons/fa6";
+import { FaUser, FaXmark } from "react-icons/fa6";
 import { RiLoginCircleFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -22,7 +22,7 @@ function MainSideNav({ isOpen, setIsOpen }) {
         </Space>
       }
       style={{
-        backgroundColor: "oklch(21% 0.034 264.665)",
+        backgroundColor: "oklch(26.9% 0 0)",
         color: "oklch(96.8% 0.007 247.896)",
       }}
       className="custom-drawer"
@@ -30,26 +30,16 @@ function MainSideNav({ isOpen, setIsOpen }) {
       <div>
         {isAuthenticated ? (
           <>
-            <NavLink
-              to="/profile"
-              className="flex flex-col items-center justify-center"
-            >
-              <div className="relative">
-                <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-600 border rounded-full border-gray-50" />
-                <Avatar
-                  style={{
-                    backgroundColor: "#f56a00",
-                    verticalAlign: "middle",
-                  }}
-                  icon={<FaRegUser />}
-                />
-              </div>
-              <div>
-                <h5 className="m-0 pl-2 text-center">
-                  {user?.name || "username"}
-                </h5>
-              </div>
-            </NavLink>
+            <div className="flex flex-col items-center justify-center gap-2 mb-4">
+              <Avatar
+                icon={<FaUser />}
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#1c375b",
+                }}
+              />
+              <p>{user.name}</p>
+            </div>
           </>
         ) : (
           <>

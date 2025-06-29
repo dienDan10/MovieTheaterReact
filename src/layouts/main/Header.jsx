@@ -1,36 +1,24 @@
-import { Avatar } from "antd";
 import { useState } from "react";
-import { FaRegUser } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import MainSideNav from "../../components/MainSideNav";
+import UserMenu from "../../components/UserMenu";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { isAuthenticated } = useSelector((state) => state.user);
 
   return (
     <>
       <MainSideNav isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      <header className="font-sans leading-normal tracking-normal">
+      <header className="font-sans leading-normal tracking-normal z-50">
         <nav
           style={{ borderBottom: "1px solid #c1c0c04a" }}
           id="navBarHeader"
           className="transition-all duration-500 flex items-center justify-between flex-wrap bg-neutral-900 py-3 px-4 md:py-4 fixed w-full z-10 top-0"
         >
-          <div className="flex items-center flex-shrink-0 text-white mr-4 md:mx-5">
-            <NavLink
-              to="/"
-              aria-label="Back to homepage"
-              className="flex items-center"
-            >
-              <span className="text-xl sm:text-2xl md:text-3xl">🍿</span>
-              <span className="text-xl font-medium text-red-500 uppercase sm:text-2xl ">
-                Cinemax
-              </span>
-            </NavLink>
-          </div>
+          {/* Mobile menu button */}
           <div className="block lg:hidden">
             <button
               onClick={() => setIsOpen(true)}
@@ -47,6 +35,20 @@ function Header() {
               </svg>
             </button>
           </div>
+          {/* Logo */}
+          <div className="flex items-center flex-shrink-0 text-white mr-4 md:mx-5">
+            <NavLink
+              to="/"
+              aria-label="Back to homepage"
+              className="flex items-center"
+            >
+              <span className="text-xl sm:text-2xl md:text-3xl">🍿</span>
+              <span className="text-xl font-medium text-red-500 uppercase sm:text-2xl ">
+                Cinemax
+              </span>
+            </NavLink>
+          </div>
+          {/* Navigation links for larger screens */}
           <div
             className="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden  pt-3 lg:pt-0"
             id="nav-content"
@@ -69,51 +71,33 @@ function Header() {
                 </Link>
               </li>
             </ul>
-            <div className="flex gap-4">
-              {isAuthenticated ? (
-                <>
-                  <NavLink
-                    to="/inforUser"
-                    className="flex flex-row items-center justify-center border-r-2 border-gray-300 pr-2"
-                  >
-                    <div className="relative">
-                      <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-600 border rounded-full border-gray-50" />
-                      <Avatar
-                        style={{
-                          backgroundColor: "#f56a00",
-                          verticalAlign: "middle",
-                        }}
-                        icon={<FaRegUser />}
-                      />
-                    </div>
-                    <div>
-                      <h5 className="m-0 pl-2 text-center">
-                        {user?.name || "username"}
-                      </h5>
-                    </div>
-                  </NavLink>
-                </>
-              ) : (
-                <>
-                  <NavLink
-                    to="login"
-                    className=" text-slate-100 px-2.5 py-1 flex items-center self-center bg-red-500 rounded-sm font-semibold"
-                  >
-                    Login
-                  </NavLink>
-                  <NavLink
-                    to="register"
-                    className="text-slate-200 px-2.5 py-1 border-[1px] rounded-sm hover:border-red-500 hover:bg-red-500 transition-all font-semibold"
-                  >
-                    Register
-                  </NavLink>
-                </>
-              )}
-            </div>
+            {/* User menu or login/register buttons */}
+          </div>
+          <div className="flex gap-4">
+            {isAuthenticated ? (
+              <div className="flex items-center justify-center me-3">
+                <UserMenu />
+              </div>
+            ) : (
+              <>
+                <NavLink
+                  to="login"
+                  className=" text-slate-100 px-2.5 py-1 flex items-center self-center bg-red-500 rounded-sm font-semibold"
+                >
+                  Login
+                </NavLink>
+                <NavLink
+                  to="register"
+                  className="text-slate-200 px-2.5 py-1 border-[1px] rounded-sm hover:border-red-500 hover:bg-red-500 transition-all font-semibold"
+                >
+                  Register
+                </NavLink>
+              </>
+            )}
           </div>
         </nav>
         {/* Add a spacer div to prevent content from being hidden under the fixed header */}
-        <div className="h-16 md:h-20"></div>
+        <div className="h-14 md:h-16"></div>
       </header>
     </>
   );
