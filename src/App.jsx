@@ -18,6 +18,7 @@ const AccountLayout = lazy(() =>
   import("./features/manager/accounts/AccountLayout")
 );
 const HomePage = lazy(() => import("./pages/HomePage"));
+const MoviesManagement = lazy(() => import("./pages/manager/MoviesManagement"));
 
 const router = createBrowserRouter([
   {
@@ -69,6 +70,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <AccountLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "movies",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <MoviesManagement />
           </Suspense>
         ),
       },
