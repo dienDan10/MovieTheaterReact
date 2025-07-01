@@ -38,7 +38,7 @@ function ProvinceTable({ onEditProvince }) {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      sorter: (a, b) => a.id.localeCompare(b.id),
+      sorter: (a, b) => a.id - b.id,
     },
     {
       title: "Name",
