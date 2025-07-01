@@ -18,7 +18,7 @@ function ManagerSider({ collapsed }) {
   const calcSelectedKey = () => {
     if (pathname.includes("dashboard")) return "1";
     if (pathname.includes("accounts")) return "2";
-    if (pathname.includes("exams")) return "3";
+    if (pathname.includes("province")) return "3";
     if (pathname.includes("announcement")) return "4";
     if (pathname.includes("feedback")) return "5";
     if (pathname.includes("report")) return "6";
@@ -54,7 +54,7 @@ function ManagerSider({ collapsed }) {
           {
             key: "3",
             icon: <TbCertificate />,
-            label: <Link to="exams">Exams</Link>,
+            label: <Link to="provinces">Provinces</Link>,
           },
           {
             key: "4",

@@ -18,6 +18,9 @@ const AccountLayout = lazy(() =>
   import("./features/manager/accounts/AccountLayout")
 );
 const HomePage = lazy(() => import("./pages/HomePage"));
+const ProvinceLayout = lazy(() =>
+  import("./features/admin/province/ProvinceLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -69,6 +72,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <AccountLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "provinces",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ProvinceLayout />
           </Suspense>
         ),
       },
