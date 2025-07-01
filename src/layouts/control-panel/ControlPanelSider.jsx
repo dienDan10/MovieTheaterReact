@@ -8,18 +8,25 @@ import {
   MdSpaceDashboard,
 } from "react-icons/md";
 import { TbCertificate } from "react-icons/tb";
+import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../../utils/constant";
 
 // eslint-disable-next-line react/prop-types
-function ManagerSider({ collapsed }) {
+function ControlPanelSider({ collapsed }) {
   const location = useLocation();
+  const { user } = useSelector((state) => state.user);
   const { pathname } = location;
+
+  const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
+  // const isManager = user?.role !== null && user.role === ROLE_MANAGER;
+  // const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
 
   const calcSelectedKey = () => {
     if (pathname.includes("dashboard")) return "1";
-    if (pathname.includes("accounts")) return "2";
-    if (pathname.includes("province")) return "3";
-    if (pathname.includes("announcement")) return "4";
+    if (pathname.includes("managers")) return "2";
+    if (pathname.includes("provinces")) return "3";
+    if (pathname.includes("theaters")) return "4";
     if (pathname.includes("feedback")) return "5";
     if (pathname.includes("report")) return "6";
   };
@@ -46,20 +53,20 @@ function ManagerSider({ collapsed }) {
             icon: <MdSpaceDashboard />,
             label: <Link to="dashboard">Dashboard</Link>,
           },
-          {
+          isAdmin && {
             key: "2",
             icon: <MdAccountCircle />,
-            label: <Link to="accounts">Accounts</Link>,
+            label: <Link to="managers">Managers</Link>,
           },
-          {
+          isAdmin && {
             key: "3",
             icon: <TbCertificate />,
             label: <Link to="provinces">Provinces</Link>,
           },
-          {
+          isAdmin && {
             key: "4",
             icon: <IoIosNotifications />,
-            label: <Link to="announcement">Announcements</Link>,
+            label: <Link to="theaters">Theaters</Link>,
           },
           {
             key: "5",
@@ -77,4 +84,4 @@ function ManagerSider({ collapsed }) {
   );
 }
 
-export default ManagerSider;
+export default ControlPanelSider;

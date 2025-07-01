@@ -3,7 +3,13 @@ import { login as loginApi } from "../../services/apiAuth";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../redux/notificationSlice";
-import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../utils/constant";
+import {
+  ERROR_NOTIFICATION,
+  ROLE_ADMIN,
+  ROLE_EMPLOYEE,
+  ROLE_MANAGER,
+  SUCCESS_NOTIFICATION,
+} from "../../utils/constant";
 import { doGetProfileAction } from "../../redux/userSlice";
 
 export function useLogin() {
@@ -25,7 +31,16 @@ export function useLogin() {
 
       dispatch(doGetProfileAction(data.data.user));
       localStorage.setItem("accessToken", data.data.accessToken);
-      navigate("/");
+      const role = data.data.user.role;
+      if (role === ROLE_ADMIN) {
+        navigate("/manage");
+      } else if (role === ROLE_MANAGER) {
+        navigate("/manage");
+      } else if (role === ROLE_EMPLOYEE) {
+        navigate("/manage");
+      } else {
+        navigate("/");
+      }
     },
     onError: (error) => {
       dispatch(

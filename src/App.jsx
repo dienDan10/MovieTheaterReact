@@ -13,13 +13,18 @@ import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
-const ManagerLayout = lazy(() => import("./layouts/manager/ManagerLayout"));
-const AccountLayout = lazy(() =>
-  import("./features/manager/accounts/AccountLayout")
+const ControlPanelLayout = lazy(() =>
+  import("./layouts/control-panel/ControlPanelLayout")
 );
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProvinceLayout = lazy(() =>
   import("./features/admin/province/ProvinceLayout")
+);
+const TheaterLayout = lazy(() =>
+  import("./features/admin/theater/TheaterLayout")
+);
+const ManagerLayout = lazy(() =>
+  import("./features/admin/manager/ManagerLayout")
 );
 
 const router = createBrowserRouter([
@@ -59,19 +64,23 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/manager",
+    path: "/manage",
     element: (
       <Suspense fallback={<SpinnerLarge />}>
-        <ManagerLayout />
+        <ControlPanelLayout />
       </Suspense>
     ),
     errorElement: <PageNotFound />,
     children: [
       {
-        path: "accounts",
+        index: true,
+        element: <Navigate to="/manage/theaters" replace />,
+      },
+      {
+        path: "managers",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
-            <AccountLayout />
+            <ManagerLayout />
           </Suspense>
         ),
       },
@@ -80,6 +89,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <ProvinceLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "theaters",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <TheaterLayout />
           </Suspense>
         ),
       },
