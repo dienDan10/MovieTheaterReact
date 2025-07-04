@@ -40,7 +40,7 @@ function TheaterDetail({ open, onClose, theaterId, onEdit }) {
             <Descriptions.Item label="Phone">{theater.phone}</Descriptions.Item>
             <Descriptions.Item label="Email">{theater.email}</Descriptions.Item>
             <Descriptions.Item label="Province">
-              {theater.province || "N/A"}
+              {theater.province?.name || "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Description">
               {theater.description || "N/A"}
