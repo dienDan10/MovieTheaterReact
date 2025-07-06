@@ -1,14 +1,19 @@
-import { Button, Popconfirm, Space, Table, message } from "antd";
-import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Popconfirm, Space, Table, message, Tag } from "antd";
+import {
+  EditOutlined,
+  EyeOutlined,
+  LockOutlined,
+  UnlockOutlined,
+} from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { useGetTheaters } from "./useGetTheaters";
-import { useDeleteTheater } from "./useDeleteTheater";
+import { useLockUnlockTheater } from "./useLockUnlockTheater";
 
 function TheaterTable({ onViewDetails, onEditTheater }) {
   const { theaters, isPending } = useGetTheaters();
-  const deleteMutation = useDeleteTheater();
-  const [deletingId, setDeletingId] = useState(null);
+  const lockUnlockMutation = useLockUnlockTheater();
+  const [processingId, setProcessingId] = useState(null);
 
   const handleView = (theater) => {
     if (onViewDetails) {
@@ -22,21 +27,24 @@ function TheaterTable({ onViewDetails, onEditTheater }) {
     }
   };
 
-  const handleDelete = (id) => {
-    setDeletingId(id);
+  const handleLockUnlock = (id) => {
+    setProcessingId(id);
     return new Promise((resolve, reject) => {
-      deleteMutation.mutate(id, {
-        onSuccess: () => {
-          message.success("Theater deleted successfully");
+      lockUnlockMutation.mutate(id, {
+        onSuccess: (data) => {
+          const actionType = data?.data?.isActive ? "unlocked" : "locked";
+          message.success(`Theater ${actionType} successfully`);
           resolve();
-          setDeletingId(null);
+          setProcessingId(null);
         },
         onError: (error) => {
           message.error(
-            `Failed to delete theater: ${error.message || "Unknown error"}`
+            `Failed to update theater status: ${
+              error.message || "Unknown error"
+            }`
           );
           reject(error);
-          setDeletingId(null);
+          setProcessingId(null);
         },
       });
     });
@@ -70,7 +78,17 @@ function TheaterTable({ onViewDetails, onEditTheater }) {
       title: "Province",
       dataIndex: "province",
       key: "province",
-      render: (_, record) => record.province || "N/A",
+      render: (_, record) => record.province?.name || "N/A",
+    },
+    {
+      title: "Status",
+      dataIndex: "isActive",
+      key: "status",
+      render: (isActive) => (
+        <Tag color={isActive ? "green" : "red"}>
+          {isActive ? "Active" : "Locked"}
+        </Tag>
+      ),
     },
     {
       title: "Actions",
@@ -90,26 +108,47 @@ function TheaterTable({ onViewDetails, onEditTheater }) {
             onClick={() => handleEdit(record)}
             title="Edit theater"
           />
-          <Popconfirm
-            title="Delete Theater"
-            description="Are you sure you want to delete this theater?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No"
-            okButtonProps={{
-              danger: true,
-              loading: deletingId === record.id,
-            }}
-          >
-            <Button
-              icon={<DeleteOutlined />}
-              type="link"
-              danger
-              loading={deletingId === record.id}
-              disabled={deletingId !== null}
-              title="Delete theater"
-            />
-          </Popconfirm>
+          {record.isActive ? (
+            <Popconfirm
+              title="Lock Theater"
+              description="Are you sure you want to lock this theater?"
+              onConfirm={() => handleLockUnlock(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{
+                danger: true,
+                loading: processingId === record.id,
+              }}
+            >
+              <Button
+                icon={<LockOutlined />}
+                type="link"
+                danger
+                loading={processingId === record.id}
+                disabled={processingId !== null}
+                title="Lock theater"
+              />
+            </Popconfirm>
+          ) : (
+            <Popconfirm
+              title="Unlock Theater"
+              description="Are you sure you want to unlock this theater?"
+              onConfirm={() => handleLockUnlock(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okButtonProps={{
+                loading: processingId === record.id,
+              }}
+            >
+              <Button
+                icon={<UnlockOutlined />}
+                type="link"
+                loading={processingId === record.id}
+                disabled={processingId !== null}
+                title="Unlock theater"
+              />
+            </Popconfirm>
+          )}
         </Space>
       ),
     },

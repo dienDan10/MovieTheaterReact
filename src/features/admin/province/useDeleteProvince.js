@@ -25,7 +25,9 @@ export function useDeleteProvince() {
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: `Deletion failed: ${error.message || "Unknown error"}`,
+          message: `Deletion failed: ${
+            error.response?.data?.message || "Unknown error"
+          }`,
         })
       ),
   });

@@ -38,10 +38,10 @@ function UserMenu() {
     {
       type: "divider",
     },
-    pathname.includes("manage") && {
-      key: "1",
-      label: <Link to={"/"}>Home page</Link>,
-    },
+    // pathname.includes("manage") && {
+    //   key: "1",
+    //   label: <Link to={"/"}>Home page</Link>,
+    // },
     (isAdmin || isManager || isEmployee) &&
       !pathname.includes("manage") && {
         label: <Link to={"/manage"}>Control Panel</Link>,

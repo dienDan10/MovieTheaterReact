@@ -32,6 +32,10 @@ const EmployeeLayout = lazy(() =>
 const CustomerLayout = lazy(() =>
   import("./features/admin/customer/CustomerLayout")
 );
+const ScreenLayout = lazy(() => import("./features/admin/screen/ScreenLayout"));
+const DashboardLayout = lazy(() =>
+  import("./features/manager/dashboard/DashboardLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -79,10 +83,6 @@ const router = createBrowserRouter([
     errorElement: <PageNotFound />,
     children: [
       {
-        index: true,
-        element: <Navigate to="/manage/theaters" replace />,
-      },
-      {
         path: "managers",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
@@ -119,6 +119,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <TheaterLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "screens",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ScreenLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <DashboardLayout />
           </Suspense>
         ),
       },
