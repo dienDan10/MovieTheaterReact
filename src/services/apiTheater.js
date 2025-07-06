@@ -49,7 +49,7 @@ export const updateTheater = async ({
   return response.data;
 };
 
-export const deleteTheater = async (id) => {
-  const response = await axios.delete(`/api/theaters/${id}`);
+export const lockUnlockTheater = async (id) => {
+  const response = await axios.put(`/api/theaters/${id}/lock`);
   return response.data;
 };

@@ -22,7 +22,7 @@ function ControlPanelSider({ collapsed }) {
   const { pathname } = location;
 
   const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
-  // const isManager = user?.role !== null && user.role === ROLE_MANAGER;
+  const isManager = user?.role !== null && user.role === ROLE_MANAGER;
   // const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
 
   const calcSelectedKey = () => {
@@ -53,7 +53,7 @@ function ControlPanelSider({ collapsed }) {
         mode="inline"
         selectedKeys={[selectedKey]}
         items={[
-          {
+          isManager && {
             key: "1",
             icon: <MdSpaceDashboard />,
             label: <Link to="dashboard">Dashboard</Link>,
@@ -102,7 +102,7 @@ function ControlPanelSider({ collapsed }) {
             icon: <RiMovie2AiFill />,
             label: <Link to="theaters">Theaters</Link>,
           },
-          isAdmin && {
+          (isAdmin || isManager) && {
             key: "7",
             icon: <GiTheater />,
             label: <Link to="screens">Screens</Link>,

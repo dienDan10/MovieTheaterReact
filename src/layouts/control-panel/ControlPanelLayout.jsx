@@ -1,13 +1,19 @@
-import { Button, ConfigProvider, Layout } from "antd";
+import { ConfigProvider, Button, Layout } from "antd";
 import { useState } from "react";
 import ManagerSider from "./ControlPanelSider";
 import { Content, Header } from "antd/es/layout/layout";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import UserMenu from "../../components/UserMenu";
 import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+import RoleBaseRoute from "../../features/auth/RoleBaseRoute";
+import { useGetTheaters } from "./useGetTheaters";
+import { ROLE_MANAGER } from "../../utils/constant";
 
 function ControlPanelLayout() {
+  const { theaters, isPending } = useGetTheaters();
   const [collapsed, setCollapsed] = useState(false);
+  const { isAuthenticated, user } = useSelector((state) => state.user);
   return (
     <ConfigProvider
       theme={{
@@ -33,13 +39,35 @@ function ControlPanelLayout() {
                 height: 64,
               }}
             />
-            <div className="px-3 md:px-8">
-              <UserMenu />
+            <div className="px-3 md:px-8 flex items-center">
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <Button
+                  type="primary"
+                  className="!bg-neutral-900 !border-neutral-900 hover:!bg-neutral-600 hover:!border-neutral-600"
+                  onClick={() => (window.location.href = "/login")}
+                >
+                  Login
+                </Button>
+              )}
             </div>
           </Header>
 
           <Content className="px-12 py-10">
-            <Outlet />
+            {user?.role === ROLE_MANAGER && isPending && (
+              <div className="flex justify-center items-center">
+                <span>Loading...</span>
+              </div>
+            )}
+            {user?.role === ROLE_MANAGER && !isPending && (
+              <div className="text-center text-2xl font-semibold mb-4 text-blue-900">
+                {theaters.find((t) => t.id === user.theaterId)?.name || "N/A"}
+              </div>
+            )}
+            <RoleBaseRoute>
+              <Outlet />
+            </RoleBaseRoute>
           </Content>
         </Layout>
       </Layout>

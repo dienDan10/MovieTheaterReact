@@ -3,6 +3,7 @@ import userReducer from "./redux/userSlice";
 import notificationReducer from "./redux/notificationSlice";
 import employeeReducer from "./redux/employeeSlice";
 import customerReducer from "./redux/customerSlice";
+import screenReducer from "./redux/screenSlice";
 
 const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ const store = configureStore({
     notification: notificationReducer,
     employee: employeeReducer,
     customer: customerReducer,
+    screen: screenReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

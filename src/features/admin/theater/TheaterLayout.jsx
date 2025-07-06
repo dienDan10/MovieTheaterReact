@@ -5,14 +5,10 @@ import { useGetTheaters } from "./useGetTheaters";
 import TheaterTable from "./TheaterTable";
 import TheaterDetail from "./TheaterDetail";
 import TheaterForm from "./TheaterForm";
-import { useSelector } from "react-redux";
-import { ROLE_ADMIN } from "../../../utils/constant";
-import AccessDenied from "../../../pages/AccessDenied";
 
 const { Title } = Typography;
 
 function TheaterLayout() {
-  const { user } = useSelector((state) => state.user);
   const { error, refetch } = useGetTheaters();
 
   // Detail drawer state
@@ -62,8 +58,6 @@ function TheaterLayout() {
       }
     }
   };
-
-  if (user?.role !== ROLE_ADMIN) return <AccessDenied />;
 
   return (
     <Card>
