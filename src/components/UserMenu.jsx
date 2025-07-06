@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
-import { ROLE_MANAGER } from "../utils/constant";
+import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../utils/constant";
 import { AiOutlineLogout } from "react-icons/ai";
 import { Avatar, Dropdown } from "antd";
 import { FaUser } from "react-icons/fa6";
@@ -19,6 +19,10 @@ function UserMenu() {
     window.location.href = "/login";
   };
 
+  const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
+  const isManager = user?.role !== null && user.role === ROLE_MANAGER;
+  const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
+
   const items = [
     {
       label: (
@@ -34,17 +38,13 @@ function UserMenu() {
     {
       type: "divider",
     },
-    pathname.includes("manager") && {
+    pathname.includes("manage") && {
       key: "1",
       label: <Link to={"/"}>Home page</Link>,
     },
-    // user.role !== ADMIN && {
-    //   label: <Link to={"/personal-banks"}>My question banks</Link>,
-    //   key: "2",
-    // },
-    user.role?.includes(ROLE_MANAGER) &&
-      !pathname.includes("manager") && {
-        label: <Link to={"/manager"}>Dashboard</Link>,
+    (isAdmin || isManager || isEmployee) &&
+      !pathname.includes("manage") && {
+        label: <Link to={"/manage"}>Control Panel</Link>,
         key: "3",
       },
     {

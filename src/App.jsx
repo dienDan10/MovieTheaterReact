@@ -13,11 +13,25 @@ import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
-const ManagerLayout = lazy(() => import("./layouts/manager/ManagerLayout"));
-const AccountLayout = lazy(() =>
-  import("./features/manager/accounts/AccountLayout")
+const ControlPanelLayout = lazy(() =>
+  import("./layouts/control-panel/ControlPanelLayout")
 );
 const HomePage = lazy(() => import("./pages/HomePage"));
+const ProvinceLayout = lazy(() =>
+  import("./features/admin/province/ProvinceLayout")
+);
+const TheaterLayout = lazy(() =>
+  import("./features/admin/theater/TheaterLayout")
+);
+const ManagerLayout = lazy(() =>
+  import("./features/admin/manager/ManagerLayout")
+);
+const EmployeeLayout = lazy(() =>
+  import("./features/admin/Employee/EmployeeLayout")
+);
+const CustomerLayout = lazy(() =>
+  import("./features/admin/customer/CustomerLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -56,19 +70,55 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/manager",
+    path: "/manage",
     element: (
       <Suspense fallback={<SpinnerLarge />}>
-        <ManagerLayout />
+        <ControlPanelLayout />
       </Suspense>
     ),
     errorElement: <PageNotFound />,
     children: [
       {
-        path: "accounts",
+        index: true,
+        element: <Navigate to="/manage/theaters" replace />,
+      },
+      {
+        path: "managers",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
-            <AccountLayout />
+            <ManagerLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "employees",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <EmployeeLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "customers",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <CustomerLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "provinces",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ProvinceLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "theaters",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <TheaterLayout />
           </Suspense>
         ),
       },

@@ -54,19 +54,6 @@ function LoginForm() {
               required
               rules={[
                 { required: true, message: "Please input your password!" },
-                {
-                  min: 6,
-                  message: "Password must be at least 6 characters long!",
-                },
-                {
-                  max: 20,
-                  message: "Password must be at most 20 characters long!",
-                },
-                {
-                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[\w\W]{6,20}$/,
-                  message:
-                    "Password must contain at least one uppercase letter, one lowercase letter, and one number!",
-                },
               ]}
             >
               <Input.Password

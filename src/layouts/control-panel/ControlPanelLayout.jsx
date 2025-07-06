@@ -1,17 +1,13 @@
 import { Button, ConfigProvider, Layout } from "antd";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import ManagerSider from "./ManagerSider";
+import ManagerSider from "./ControlPanelSider";
 import { Content, Header } from "antd/es/layout/layout";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
 import UserMenu from "../../components/UserMenu";
 import { Outlet } from "react-router-dom";
-import { ROLE_ADMIN, ROLE_MANAGER } from "../../utils/constant";
-import AccessDenied from "../../pages/AccessDenied";
 
-function ManagerLayout() {
+function ControlPanelLayout() {
   const [collapsed, setCollapsed] = useState(false);
-  const { user } = useSelector((state) => state.user);
   return (
     <ConfigProvider
       theme={{
@@ -43,7 +39,7 @@ function ManagerLayout() {
           </Header>
 
           <Content className="px-12 py-10">
-            {user.role?.includes(ROLE_MANAGER) ? <Outlet /> : <AccessDenied />}
+            <Outlet />
           </Content>
         </Layout>
       </Layout>
@@ -51,4 +47,4 @@ function ManagerLayout() {
   );
 }
 
-export default ManagerLayout;
+export default ControlPanelLayout;
