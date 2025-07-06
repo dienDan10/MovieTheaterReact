@@ -54,7 +54,7 @@ function ManagerSider({ collapsed }) {
           {
             key: "3",
             icon: <TbCertificate />,
-            label: <Link to="movies">Movies</Link>,
+            label: <Link to="exams">Exams</Link>,
           },
           {
             key: "4",
