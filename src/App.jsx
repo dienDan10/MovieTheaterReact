@@ -37,6 +37,9 @@ const DashboardLayout = lazy(() =>
   import("./features/manager/dashboard/DashboardLayout")
 );
 const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
+const BookingLayout = lazy(() =>
+  import("./features/customer/booking/BookingLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -44,6 +47,10 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <PageNotFound />,
     children: [
+      {
+        index: true,
+        element: <Navigate to="/home" replace />,
+      },
       {
         path: "login",
         element: (
@@ -61,14 +68,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        index: true,
-        element: <Navigate to="/home" replace />,
-      },
-      {
         path: "home",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "booking/:showtimeId",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <BookingLayout />
           </Suspense>
         ),
       },

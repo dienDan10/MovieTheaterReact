@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* CUSTOM STYLE */
+@layer utilities {
+  .bg-repeating-stripe {
+    background: repeating-linear-gradient(
+      45deg,
+      hsla(0, 0%, 60%, 0.4),
+      hsla(0, 0%, 60%, 0.4) 10px,
+      hsla(0, 0%, 60%, 0.6) 0,
+      hsla(0, 0%, 60%, 0.6) 20px
+    );
+  }
+}
+
 /* CSS FOR ADMIN SIDE NAVIGATOR */
 
 .ant-menu .ant-menu-submenu-title {

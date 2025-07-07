@@ -12,18 +12,18 @@ function Header() {
     <>
       <MainSideNav isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      <header className="font-sans leading-normal tracking-normal z-50">
+      <header className="font-sans leading-normal tracking-normal z-50 sticky top-0">
         <nav
           style={{ borderBottom: "1px solid #c1c0c04a" }}
           id="navBarHeader"
-          className="transition-all duration-500 flex items-center justify-between flex-wrap bg-neutral-900 py-3 px-4 md:py-4 fixed w-full z-10 top-0"
+          className="transition-all duration-500 flex items-center justify-between flex-wrap bg-neutral-900 py-2 px-4 md:py-4 w-full"
         >
           {/* Mobile menu button */}
           <div className="block lg:hidden">
             <button
               onClick={() => setIsOpen(true)}
               id="nav-toggle"
-              className="flex items-center px-2 hover:cursor-pointer py-1.5 border rounded text-gray-500 border-red-500"
+              className="flex items-center px-2 hover:cursor-pointer py-1.5 "
             >
               <svg
                 className="fill-current h-4 w-4 text-red-500"
@@ -42,7 +42,7 @@ function Header() {
               aria-label="Back to homepage"
               className="flex items-center"
             >
-              <span className="text-xl sm:text-2xl md:text-3xl">🍿</span>
+              <span className="text-xl sm:text-2xl md:text-2xl">🍿</span>
               <span className="text-xl font-medium text-red-500 uppercase sm:text-2xl ">
                 Cinemax
               </span>
@@ -97,7 +97,7 @@ function Header() {
           </div>
         </nav>
         {/* Add a spacer div to prevent content from being hidden under the fixed header */}
-        <div className="h-14 md:h-16"></div>
+        {/* <div className="h-14 md:h-16"></div> */}
       </header>
     </>
   );

@@ -5,6 +5,7 @@ import { AiOutlineLogout } from "react-icons/ai";
 import { Avatar, Dropdown } from "antd";
 import { FaUser } from "react-icons/fa6";
 import { doLogoutAction } from "../redux/userSlice";
+import { useEffect, useState } from "react";
 
 function UserMenu() {
   const { user } = useSelector((state) => state.user);
@@ -63,6 +64,21 @@ function UserMenu() {
     },
   ];
 
+  // Responsive avatar size based on screen width
+  const getAvatarSize = () => {
+    if (window.innerWidth < 640) return 26; // small screens
+    if (window.innerWidth < 1024) return 28; // medium screens
+    return 32; // large screens
+  };
+
+  const [avatarSize, setAvatarSize] = useState(getAvatarSize());
+
+  useEffect(() => {
+    const handleResize = () => setAvatarSize(getAvatarSize());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <Dropdown
       menu={{
@@ -70,13 +86,9 @@ function UserMenu() {
       }}
       trigger={["click"]}
     >
-      {/* <img
-        className="w-8 h-8 rounded-full cursor-pointer"
-        src="default-user.jpg"
-        alt="user-photo"
-      /> */}
       <Avatar
         icon={<FaUser />}
+        size={avatarSize}
         style={{
           backgroundColor: "#ffffff",
           color: "#1c375b",
