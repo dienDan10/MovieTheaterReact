@@ -42,7 +42,7 @@
   padding: 0;
   margin: 0;
   list-style: none;
-  z-index: 20;
+  z-index: 5;
 }
 
 .custom-dots li {

@@ -4,6 +4,7 @@ import notificationReducer from "./redux/notificationSlice";
 import employeeReducer from "./redux/employeeSlice";
 import customerReducer from "./redux/customerSlice";
 import screenReducer from "./redux/screenSlice";
+import seatReducer from "./redux/seatSlice";
 
 const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ const store = configureStore({
     employee: employeeReducer,
     customer: customerReducer,
     screen: screenReducer,
+    seat: seatReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
