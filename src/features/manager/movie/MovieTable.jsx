@@ -33,7 +33,10 @@ function MovieTable({ onViewDetails, onEditMovie }) {
 
   const [searchText, setSearchText] = useState("");
 
-  const filteredMovies = (data || []).filter((movie) =>
+  // Defensive: ensure data is an array
+  const movieArray = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+
+  const filteredMovies = movieArray.filter((movie) =>
     movie.title.toLowerCase().includes(searchText.toLowerCase())
   );
 

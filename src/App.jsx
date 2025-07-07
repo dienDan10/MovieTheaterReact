@@ -34,6 +34,9 @@ const CustomerLayout = lazy(() =>
   import("./features/admin/customer/CustomerLayout")
 );
 const MovieLayout = lazy(() => import("./features/manager/movie/MovieLayout"));
+const ShowTimeLayout = lazy(() =>
+  import("./features/manager/showTime/ShowTimeLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -129,6 +132,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <MovieLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "showtimes",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ShowTimeLayout />
           </Suspense>
         ),
       },

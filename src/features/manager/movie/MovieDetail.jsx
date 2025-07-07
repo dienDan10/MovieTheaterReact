@@ -34,21 +34,36 @@ function MovieDetail({ movieId}) {
           </div>
         ) : movie ? (
           <Descriptions bordered column={1}>
+            <Descriptions.Item label="ID">{movie.id}</Descriptions.Item>
             <Descriptions.Item label="Title">{movie.title}</Descriptions.Item>
-            <Descriptions.Item label="Genre">{movie.genre}</Descriptions.Item>
-            {movie.year && <Descriptions.Item label="Year">{movie.year}</Descriptions.Item>}
-            <Descriptions.Item label="Description">
-              {movie.description}
-            </Descriptions.Item>
-            {movie.poster && (
-              <Descriptions.Item label="Poster">
+            <Descriptions.Item label="Poster">
+              {movie.posterUrl || movie.poster ? (
                 <img
-                  src={movie.poster}
+                  src={movie.posterUrl || movie.poster}
                   alt="Poster"
                   style={{ width: 120 }}
                 />
-              </Descriptions.Item>
-            )}
+              ) : (
+                <span style={{ color: '#bbb', fontStyle: 'italic' }}>No Poster</span>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trailer">
+              {movie.trailerUrl ? (
+                <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">Watch Trailer</a>
+              ) : (
+                <span style={{ color: '#bbb', fontStyle: 'italic' }}>No Trailer</span>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Genre">{movie.genre}</Descriptions.Item>
+            <Descriptions.Item label="Director">{movie.director}</Descriptions.Item>
+            <Descriptions.Item label="Cast">{movie.cast}</Descriptions.Item>
+            <Descriptions.Item label="Description">{movie.description}</Descriptions.Item>
+            <Descriptions.Item label="Duration">{movie.duration ? `${movie.duration} minutes` : ''}</Descriptions.Item>
+            <Descriptions.Item label="Release Date">{movie.releaseDate ? (typeof movie.releaseDate === 'string' ? movie.releaseDate : movie.releaseDate?.toString()) : ''}</Descriptions.Item>
+            
+            <Descriptions.Item label="Active">
+              {movie.isActive ? 'Yes' : 'No'}
+            </Descriptions.Item>
           </Descriptions>
         ) : error ? (
           <div style={{ color: 'red', textAlign: 'center' }}>Failed to load movie details.</div>

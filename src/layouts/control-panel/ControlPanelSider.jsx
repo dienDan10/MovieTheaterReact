@@ -22,7 +22,7 @@ function ControlPanelSider({ collapsed }) {
   const { pathname } = location;
 
   const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
-  // const isManager = user?.role !== null && user.role === ROLE_MANAGER;
+  const isManager = user?.role !== null && user.role === ROLE_MANAGER;
   // const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
 
   const calcSelectedKey = () => {
@@ -111,6 +111,16 @@ function ControlPanelSider({ collapsed }) {
             key: "8",
             icon: <MdReport />,
             label: <Link to="report">Report</Link>,
+          },
+          isManager && {
+            key: "9",
+            icon: <RiMovie2AiFill />,
+            label: <Link to="movies">Movie Management</Link>,
+          },
+          isManager && {
+            key: "10",
+            icon: <GiTheater />,
+            label: <Link to="showtimes">ShowTime Management</Link>,
           },
         ]}
       />

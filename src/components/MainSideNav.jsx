@@ -77,6 +77,22 @@ function MainSideNav({ isOpen, setIsOpen }) {
             News
           </NavLink>
         </li>
+        <li className="mr-3">
+          <NavLink
+            to="/manage/movies"
+            className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
+          >
+            Movie Management
+          </NavLink>
+        </li>
+        <li className="mr-3">
+          <NavLink
+            to="/manage/showtimes"
+            className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
+          >
+            ShowTime Management
+          </NavLink>
+        </li>
       </ul>
     </Drawer>
   );
