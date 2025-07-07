@@ -11,6 +11,7 @@ import { notification } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
+
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ControlPanelLayout = lazy(() =>
@@ -32,6 +33,7 @@ const EmployeeLayout = lazy(() =>
 const CustomerLayout = lazy(() =>
   import("./features/admin/customer/CustomerLayout")
 );
+const MovieLayout = lazy(() => import("./features/manager/movie/MovieLayout"));
 
 const router = createBrowserRouter([
   {
@@ -119,6 +121,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <TheaterLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "movies",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <MovieLayout />
           </Suspense>
         ),
       },
