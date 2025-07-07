@@ -36,6 +36,7 @@ const ScreenLayout = lazy(() => import("./features/admin/screen/ScreenLayout"));
 const DashboardLayout = lazy(() =>
   import("./features/manager/dashboard/DashboardLayout")
 );
+const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
 
 const router = createBrowserRouter([
   {
@@ -127,6 +128,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <ScreenLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "seats",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <SeatLayout />
           </Suspense>
         ),
       },

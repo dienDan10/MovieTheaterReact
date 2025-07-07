@@ -1,7 +1,7 @@
 import axios from "../utils/axios-customize";
 
 export const getScreens = async (theaterId) => {
-  const response = await axios.get(`api/screens?theaterId=${theaterId || 0}`);
+  const response = await axios.get(`/api/screens?theaterId=${theaterId || 0}`);
   return response.data;
 };
 
