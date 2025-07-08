@@ -1,13 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { getShowTimes } from "../../../services/apiShowTime";
 
-const useGetShowTimes = () => {
+const useGetShowTimes = (dateRange) => {
+  // dateRange: [startDayjs, endDayjs]
   return useQuery({
-    queryKey: ["showtimes"],
+    queryKey: ["showtimes", dateRange?.[0]?.format("YYYY-MM-DD"), dateRange?.[1]?.format("YYYY-MM-DD")],
     queryFn: async () => {
-      const res = await customAxios.get("/api/showtimes");
-      return res.data;
+      let startDate, endDate;
+      if (Array.isArray(dateRange) && dateRange.length === 2) {
+        // Only pass date part (no time)
+        startDate = dateRange[0]?.format("YYYY-MM-DD");
+        endDate = dateRange[1]?.format("YYYY-MM-DD");
+      }
+      console.log("[useGetShowTimes] startDate:", startDate, "endDate:", endDate);
+      return await getShowTimes({ startDate, endDate });
     },
+    keepPreviousData: true,
   });
 };
 

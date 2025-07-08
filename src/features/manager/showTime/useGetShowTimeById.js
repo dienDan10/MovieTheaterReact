@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import {getShowTimeById} from "../../../services/apiShowTime";
 
 const useGetShowTimeById = (id, enabled = true) => {
   return useQuery({
     queryKey: ["showtime", id],
     queryFn: async () => {
-      const res = await customAxios.get(`/api/showtimes/${id}`);
-      return res.data;
+      return await getShowTimeById(id);
     },
     enabled: !!id && enabled,
   });

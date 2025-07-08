@@ -1,7 +1,9 @@
 import customAxios from "../utils/axios-customize";
 
-export const getShowTimes = async () => {
-  const res = await customAxios.get("/api/showtimes");
+export const getShowTimes = async ({ startDate, endDate }) => {
+  const res = await customAxios.get("/api/showtimes", {
+    params: { startDate, endDate },
+  });
   return res.data;
 };
 
@@ -10,20 +12,12 @@ export const getShowTimeById = async (id) => {
   return res.data;
 };
 
-export const createShowTime = async ({
-  movieId,
-  screenId,
-  date,
-  startTime,
-  endTime,
-  ticketPrice,
-}) => {
+export const createShowTimes = async ({ movieId, screenId, showTimes, ticketPrice }) => {
+  // showTimes: [ { date, startTimes: [{ticks}], endTimes: [{ticks}] } ]
   const res = await customAxios.post("/api/showtimes", {
     movieId,
     screenId,
-    date,
-    startTime,
-    endTime,
+    showTimes,
     ticketPrice,
   });
   return res.data;

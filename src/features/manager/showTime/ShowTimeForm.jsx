@@ -1,4 +1,4 @@
-import { Modal, Form, Input, InputNumber, DatePicker, TimePicker, Button, Spin, Select } from "antd";
+import { Modal, Form, Input, InputNumber, DatePicker, TimePicker, Button, Spin, Select, Space } from "antd";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import useCreateShowTime from "./useCreateShowTime";
@@ -21,6 +21,7 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
   const { data: screensData } = useGetScreens();
   const screens = Array.isArray(screensData) ? screensData : (screensData?.data || []);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [timeSlots, setTimeSlots] = useState([{ startTime: null, endTime: null }]);
 
   useEffect(() => {
     if (showTime && isEdit) {
@@ -29,11 +30,18 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
         movieId: data.movieId,
         screenId: data.screenId,
         date: data.date ? dayjs(data.date) : null,
-        startTime: data.startTime ? dayjs(data.startTime, "HH:mm:ss") : null,
-        endTime: data.endTime ? dayjs(data.endTime, "HH:mm:ss") : null,
         ticketPrice: data.ticketPrice,
       });
       setSelectedMovie(movies.find(m => m.id === data.movieId));
+      // Set time slots
+      const slots = data.showTimes?.[0] || {};
+      const startTimes = slots.startTimes || [];
+      const endTimes = slots.endTimes || [];
+      const newTimeSlots = startTimes.map((startTime, idx) => ({
+        startTime: dayjs(startTime.ticks / 10000 - 621355968000000000),
+        endTime: endTimes[idx] ? dayjs(endTimes[idx].ticks / 10000 - 621355968000000000) : null,
+      }));
+      setTimeSlots(newTimeSlots);
     } else if (open && !isEdit && movieId && movies.length > 0) {
       // Pre-select movie if movieId is provided in create mode and movies are loaded
       form.setFieldsValue({ movieId });
@@ -45,6 +53,7 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
     if (open && !isEdit && !movieId) {
       form.resetFields();
       setSelectedMovie(null);
+      setTimeSlots([{ startTime: null, endTime: null }]);
     }
   }, [open, form, isEdit, movieId]);
 
@@ -55,50 +64,60 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
     form.setFieldsValue({ movieId: value });
   };
 
-  // Auto-calculate endTime when movie or startTime changes
-  const handleFormValuesChange = (changedValues, allValues) => {
-    if (changedValues.startTime || changedValues.movieId) {
-      const movie = movies.find(m => m.id === (allValues.movieId || (selectedMovie && selectedMovie.id)));
-      const startTime = allValues.startTime;
-      if (movie && startTime && movie.duration) {
-        const end = startTime.clone().add(movie.duration, 'minute');
-        form.setFieldsValue({ endTime: end });
-        setSelectedMovie(movie); // keep selectedMovie in sync
-      }
-    }
+  // Add/remove time slot handlers
+  const handleAddTimeSlot = () => {
+    setTimeSlots([...timeSlots, { startTime: null, endTime: null }]);
   };
+  const handleRemoveTimeSlot = (idx) => {
+    setTimeSlots(timeSlots.filter((_, i) => i !== idx));
+  };
+  // Update time slot value and auto-calculate endTime
+  const handleTimeSlotChange = (idx, field, value) => {
+    const newSlots = [...timeSlots];
+    newSlots[idx][field] = value;
+    // Auto-calculate endTime if startTime or movie changes
+    if (field === 'startTime' && selectedMovie && selectedMovie.duration && value) {
+      newSlots[idx].endTime = value.clone().add(selectedMovie.duration, 'minute');
+    }
+    setTimeSlots(newSlots);
+  };
+
+  // When movie changes, recalculate all endTimes
+  useEffect(() => {
+    if (selectedMovie && selectedMovie.duration) {
+      setTimeSlots(slots => slots.map(slot => {
+        if (slot.startTime) {
+          return { ...slot, endTime: slot.startTime.clone().add(selectedMovie.duration, 'minute') };
+        }
+        return { ...slot, endTime: null };
+      }));
+    }
+  }, [selectedMovie]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      // Kiểm tra duration
-      if (selectedMovie) {
-        const start = values.startTime;
-        const end = values.endTime;
-        if (start && end) {
-          // Chỉ lấy phút, bỏ phần giây
-          const startMinutes = start.hour() * 60 + start.minute();
-          const endMinutes = end.hour() * 60 + end.minute();
-          const durationMinutes = endMinutes - startMinutes;
-          if (durationMinutes < selectedMovie.duration) {
-            form.setFields([{
-              name: 'endTime',
-              errors: [`Show time duration must >= movie duration (${selectedMovie.duration} minutes)`],
-            }]);
-            return;
-          }
+      // Validate all time slots
+      for (let i = 0; i < timeSlots.length; i++) {
+        const slot = timeSlots[i];
+        if (!slot.startTime || !slot.endTime) {
+          throw new Error("Please select start time for all slots");
+        }
+        if (slot.endTime.isBefore(slot.startTime)) {
+          throw new Error("End time must be after start time");
+        }
+        if (selectedMovie && slot.endTime.diff(slot.startTime, 'minute') < selectedMovie.duration) {
+          throw new Error(`Slot #${i+1}: Duration must >= movie duration (${selectedMovie.duration} minutes)`);
         }
       }
       setSubmitting(true);
-      const submitValues = {
-        movieId: Number(values.movieId),
-        screenId: Number(values.screenId),
-        date: values.date ? values.date.format("YYYY-MM-DD") : null,
-        startTime: values.startTime ? values.startTime.format("HH:mm:ss") : null,
-        endTime: values.endTime ? values.endTime.format("HH:mm:ss") : null,
-        ticketPrice: Number(values.ticketPrice),
-      };
       if (isEdit) {
+        const submitValues = {
+          movieId: Number(values.movieId),
+          screenId: Number(values.screenId),
+          date: values.date ? values.date.format("YYYY-MM-DD") : null,
+          ticketPrice: Number(values.ticketPrice),
+        };
         updateMutation.mutate(
           { id: showTimeId, ...submitValues },
           {
@@ -107,14 +126,30 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
           }
         );
       } else {
-        createMutation.mutate(submitValues, {
+        // Bulk create
+        const showTimes = [
+          {
+            date: values.date.format("YYYY-MM-DD"),
+            startTimes: timeSlots.map(slot => slot.startTime ? slot.startTime.format("HH:mm") : null),
+            endTimes: timeSlots.map(slot => slot.endTime ? slot.endTime.format("HH:mm") : null),
+          }
+        ];
+        createMutation.mutate({
+          movieId: Number(values.movieId),
+          screenId: Number(values.screenId),
+          showTimes,
+          ticketPrice: Number(values.ticketPrice),
+        }, {
           onSuccess: () => onClose(true),
           onSettled: () => setSubmitting(false),
         });
       }
     } catch (err) {
       // Nếu validateFields lỗi thì không làm gì, form sẽ tự hiển thị lỗi
-        console.error("Validation failed:", err);
+      if (err instanceof Error) {
+        form.setFields([{ name: 'timeSlots', errors: [err.message] }]);
+      }
+      console.error("Validation failed:", err);
     }
   };
 
@@ -138,7 +173,7 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
       closable={!isSubmitting}
     >
       <Spin spinning={isEdit && isLoading}>
-        <Form form={form} layout="vertical" disabled={isSubmitting} onValuesChange={handleFormValuesChange}>
+        <Form form={form} layout="vertical" disabled={isSubmitting}>
           <Form.Item name="movieId" label="Movie" rules={[{ required: true, message: "Please select a movie" }]}> 
             <Select
               showSearch
@@ -164,14 +199,32 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select date" }]}>
+          <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select date" }]}> 
             <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
           </Form.Item>
-          <Form.Item name="startTime" label="Start Time" rules={[{ required: true, message: "Please select start time" }]}>
-            <TimePicker style={{ width: "100%" }} format="HH:mm" />
-          </Form.Item>
-          <Form.Item name="endTime" label="End Time" rules={[{ required: true, message: "Please select end time" }]}>
-            <TimePicker style={{ width: "100%" }} format="HH:mm" />
+          <Form.Item label="Showtime Slots" required>
+            {timeSlots.map((slot, idx) => (
+              <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                <TimePicker
+                  value={slot.startTime}
+                  onChange={v => handleTimeSlotChange(idx, 'startTime', v)}
+                  format="HH:mm"
+                  placeholder="Start Time"
+                  style={{ width: 100 }}
+                />
+                <TimePicker
+                  value={slot.endTime}
+                  format="HH:mm"
+                  placeholder="End Time"
+                  style={{ width: 100 }}
+                  disabled
+                />
+                {timeSlots.length > 1 && (
+                  <Button danger onClick={() => handleRemoveTimeSlot(idx)} size="small">Remove</Button>
+                )}
+              </Space>
+            ))}
+            <Button type="dashed" onClick={handleAddTimeSlot} block size="small">+ Add Slot</Button>
           </Form.Item>
           <Form.Item 
             name="ticketPrice" 

@@ -23,18 +23,13 @@ function ShowTimeLayout() {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
 
   // Filter/search state
-  const [dateRange, setDateRange] = useState([
-    dayjs().subtract(7, "day"),
-    dayjs().add(7, "day"),
-  ]);
+  const [dateRange, setDateRange] = useState();
   const [searchTitle, setSearchTitle] = useState("");
-
-  // Pagination state
-  const [page] = useState(1);
-  const pageSize = 4; // Number of date groups per page
+  const [pendingDateRange, setPendingDateRange] = useState();
+  const [pendingSearchTitle, setPendingSearchTitle] = useState("");
 
   // Lấy dữ liệu showtime thực tế
-  const { data: showTimes = [] } = useGetShowTimes();
+  const { data: showTimes = [] } = useGetShowTimes(dateRange);
   // Lấy danh sách phim
   const { movies = [] } = useGetMovies();
   const deleteShowTimeMutation = useDeleteShowTime();
@@ -47,31 +42,20 @@ function ShowTimeLayout() {
     const showTimeList = Array.isArray(showTimes.data) ? showTimes.data : [];
     if (showTimeList.length === 0) return [];
     const hasMovies = Array.isArray(movies) && movies.length > 0;
-    // Defensive: ensure dateRange is always an array of 2 dayjs objects
-    let start = dayjs().subtract(7, "day");
-    let end = dayjs().add(7, "day");
-    if (Array.isArray(dateRange) && dateRange.length === 2 && dayjs.isDayjs(dateRange[0]) && dayjs.isDayjs(dateRange[1])) {
-      [start, end] = dateRange;
-    }
+    // Không lọc theo dateRange ở client nữa, chỉ lọc theo searchTitle nếu có
     const filtered = showTimeList.filter((st) => {
-      // Chuẩn hóa ngày và giờ
-      const showDateTime = dayjs(`${st.date.split("T")[0]} ${st.startTime}`, "YYYY-MM-DD HH:mm:ss");
-      const inRange =
-        showDateTime.isSame(start) ||
-        showDateTime.isSame(end) ||
-        (showDateTime.isAfter(start) && showDateTime.isBefore(end));
-      if (!hasMovies) return inRange;
+      if (!hasMovies) return true;
       const movie = movies.find((m) => m.id === st.movieId);
       const matchTitle =
         searchTitle
           ? movie?.title?.toLowerCase().includes(searchTitle.toLowerCase())
           : true;
-      return inRange && matchTitle;
+      return matchTitle;
     });
     // Group by date
     const byDate = {};
     filtered.forEach((st) => {
-      const date = st.date.split("T")[0]; // chỉ lấy phần ngày
+      const date = st.date.split("T")[0]; // only date part
       if (!byDate[date]) byDate[date] = [];
       byDate[date].push(st);
     });
@@ -99,12 +83,12 @@ function ShowTimeLayout() {
         movies: Object.values(movieMap),
       };
     });
-  }, [showTimes, dateRange, searchTitle, movies]);
+  }, [showTimes, searchTitle, movies]);
 
   // Calculate total showtime slots
   const totalShowTimes = groupedShowTimes.reduce((sum, group) => sum + group.movies.reduce((s, m) => s + (m.showtimes?.length || 0), 0), 0);
-  // Paginate date groups
-  const pagedGroups = groupedShowTimes.slice((page - 1) * pageSize, page * pageSize);
+  // No pagination: show all date groups
+  const pagedGroups = groupedShowTimes;
 
 
   // Handle creating a new showtime
@@ -123,10 +107,14 @@ function ShowTimeLayout() {
 
   // Filter/search handlers
   const handleDateRangeChange = (range) => {
-    setDateRange(range);
+    setPendingDateRange(range);
   };
   const handleSearchTitleChange = (e) => {
-    setSearchTitle(e.target.value);
+    setPendingSearchTitle(e.target.value);
+  };
+  const handleApplyFilter = () => {
+    setDateRange(pendingDateRange);
+    setSearchTitle(pendingSearchTitle);
   };
 
 
@@ -202,10 +190,9 @@ function ShowTimeLayout() {
                 Date Range
               </div>
               <RangePicker
-                value={dateRange}
+                value={pendingDateRange}
                 onChange={handleDateRangeChange}
-                showTime
-                format="YYYY-MM-DD HH:mm"
+                format="YYYY-MM-DD"
                 style={{ width: "100%" }}
                 classNames={{ popup: { root: "showtime-range-picker-popup" } }}
               />
@@ -216,11 +203,21 @@ function ShowTimeLayout() {
               </div>
               <Input
                 placeholder="Search by movie title"
-                value={searchTitle}
+                value={pendingSearchTitle}
                 onChange={handleSearchTitleChange}
                 allowClear
                 style={{ width: "100%" }}
               />
+            </Col>
+            <Col xs={24} sm={24} md={8} lg={6} style={{ marginBottom: 8}}>
+              <Button 
+                type="primary" 
+                onClick={handleApplyFilter} 
+                size="middle"
+                style={{ width:"100%", alignSelf: 'flex-start !important' , marginLeft: 8 }}
+              >
+                Apply Filter
+              </Button>
             </Col>
           </Row>
           {/* Grouped ShowTime Layout */}
