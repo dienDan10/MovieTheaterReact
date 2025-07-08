@@ -11,6 +11,7 @@ import { notification } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
+
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ControlPanelLayout = lazy(() =>
@@ -31,6 +32,10 @@ const EmployeeLayout = lazy(() =>
 );
 const CustomerLayout = lazy(() =>
   import("./features/admin/customer/CustomerLayout")
+);
+const MovieLayout = lazy(() => import("./features/manager/movie/MovieLayout"));
+const ShowTimeLayout = lazy(() =>
+  import("./features/manager/showTime/ShowTimeLayout")
 );
 const ScreenLayout = lazy(() => import("./features/admin/screen/ScreenLayout"));
 const DashboardLayout = lazy(() =>
@@ -99,6 +104,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <ManagerLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "movies",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <MovieLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "showtimes",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ShowTimeLayout />
           </Suspense>
         ),
       },

@@ -90,6 +90,16 @@ function ControlPanelSider({ collapsed }) {
             icon: <MdChair />,
             label: <Link to="seats">Seats</Link>,
           },
+          isManager && {
+            key: "9",
+            icon: <RiMovie2AiFill />,
+            label: <Link to="movies">Movie Management</Link>,
+          },
+          isManager && {
+            key: "10",
+            icon: <GiTheater />,
+            label: <Link to="showtimes">ShowTime Management</Link>,
+          },
         ]}
       />
     </Sider>

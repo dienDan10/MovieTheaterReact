@@ -39,6 +39,15 @@ function ManagerForm({ open, onClose, manager, mode = "create" }) {
     const values = await form.validateFields();
     setSubmitting(true);
 
+    // Đảm bảo phoneNumber là string, theaterId là number
+    const payload = {
+      username: values.username,
+      email: values.email,
+      password: values.password,
+      phoneNumber: String(values.phoneNumber),
+      theaterId: Number(values.theaterId),
+    };
+
     if (isEdit) {
       updateMutation.mutate(
         {
@@ -46,8 +55,8 @@ function ManagerForm({ open, onClose, manager, mode = "create" }) {
           data: {
             username: values.username,
             email: values.email,
-            phoneNumber: values.phoneNumber || null,
-            theaterId: values.theaterId,
+            phoneNumber: String(values.phoneNumber),
+            theaterId: Number(values.theaterId),
           },
         },
         {
@@ -77,13 +86,7 @@ function ManagerForm({ open, onClose, manager, mode = "create" }) {
       );
     } else {
       createMutation.mutate(
-        {
-          username: values.username,
-          email: values.email,
-          password: values.password,
-          phoneNumber: values.phoneNumber,
-          theaterId: values.theaterId,
-        },
+        payload,
         {
           onSuccess: () => {
             dispatch(
