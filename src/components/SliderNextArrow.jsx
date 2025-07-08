@@ -2,7 +2,7 @@
 function SliderNextArrow({ onClick, style }) {
   return (
     <div
-      className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white hover:bg-white/70 hover:text-gray-900 transition-all"
+      className="absolute right-4 top-1/2 z-5 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white hover:bg-white/70 hover:text-gray-900 transition-all"
       style={style}
       onClick={onClick}
     >

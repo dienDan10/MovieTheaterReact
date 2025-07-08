@@ -6,6 +6,7 @@ const initialState = {
     id: null,
     name: null,
     email: null,
+    theaterId: null,
     role: null,
   },
 };
@@ -18,8 +19,8 @@ export const userSlice = createSlice({
       state.isAuthenticated = true;
     },
     doGetProfileAction: (state, action) => {
-      const { id, displayName, email, role } = action.payload;
-      state.user = { id, name: displayName, email, role };
+      const { id, displayName, email, role, theaterId } = action.payload;
+      state.user = { id, name: displayName, email, role, theaterId };
       state.isAuthenticated = true;
     },
     doLogoutAction: (state) => {

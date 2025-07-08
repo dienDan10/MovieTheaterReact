@@ -37,6 +37,11 @@ const MovieLayout = lazy(() => import("./features/manager/movie/MovieLayout"));
 const ShowTimeLayout = lazy(() =>
   import("./features/manager/showTime/ShowTimeLayout")
 );
+const ScreenLayout = lazy(() => import("./features/admin/screen/ScreenLayout"));
+const DashboardLayout = lazy(() =>
+  import("./features/manager/dashboard/DashboardLayout")
+);
+const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
 
 const router = createBrowserRouter([
   {
@@ -84,14 +89,26 @@ const router = createBrowserRouter([
     errorElement: <PageNotFound />,
     children: [
       {
-        index: true,
-        element: <Navigate to="/manage/theaters" replace />,
-      },
-      {
         path: "managers",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <ManagerLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "movies",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <MovieLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "showtimes",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ShowTimeLayout />
           </Suspense>
         ),
       },
@@ -128,18 +145,26 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "movies",
+        path: "screens",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
-            <MovieLayout />
+            <ScreenLayout />
           </Suspense>
         ),
       },
       {
-        path: "showtimes",
+        path: "seats",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
-            <ShowTimeLayout />
+            <SeatLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <DashboardLayout />
           </Suspense>
         ),
       },

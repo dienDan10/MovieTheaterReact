@@ -1,13 +1,6 @@
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { IoIosNotifications } from "react-icons/io";
-import {
-  MdAccountCircle,
-  MdFeedback,
-  MdReport,
-  MdSpaceDashboard,
-} from "react-icons/md";
-import { TbCertificate } from "react-icons/tb";
+import { MdAccountCircle, MdChair, MdSpaceDashboard } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../../utils/constant";
@@ -33,7 +26,7 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("provinces")) return "5";
     if (pathname.includes("theaters")) return "6";
     if (pathname.includes("screens")) return "7";
-    if (pathname.includes("report")) return "8";
+    if (pathname.includes("seats")) return "8";
   };
 
   const selectedKey = calcSelectedKey();
@@ -43,7 +36,7 @@ function ControlPanelSider({ collapsed }) {
       trigger={null}
       collapsible
       collapsed={collapsed}
-      className="h-screen sticky top-0 left-0 bottom-0 bg-gray-900"
+      className="h-screen sticky! top-0 left-0 bottom-0 bg-gray-900"
     >
       <div className="h-16 text-gray-50 font-bold tracking-wider text-2xl flex items-center justify-center mb-2">
         {collapsed ? "🍿" : "CINEMAX"}
@@ -53,7 +46,7 @@ function ControlPanelSider({ collapsed }) {
         mode="inline"
         selectedKeys={[selectedKey]}
         items={[
-          {
+          isManager && {
             key: "1",
             icon: <MdSpaceDashboard />,
             label: <Link to="dashboard">Dashboard</Link>,
@@ -77,21 +70,6 @@ function ControlPanelSider({ collapsed }) {
               },
             ],
           },
-          // isAdmin && {
-          //   key: "2",
-          //   icon: <MdAccountCircle />,
-          //   label: <Link to="managers">Managers</Link>,
-          // },
-          // isAdmin && {
-          //   key: "3",
-          //   icon: <MdAccountCircle />,
-          //   label: <Link to="employees">Employees</Link>,
-          // },
-          // isAdmin && {
-          //   key: "4",
-          //   icon: <MdAccountCircle />,
-          //   label: <Link to="customers">Customers</Link>,
-          // },
           isAdmin && {
             key: "5",
             icon: <FaLocationDot />,
@@ -102,15 +80,15 @@ function ControlPanelSider({ collapsed }) {
             icon: <RiMovie2AiFill />,
             label: <Link to="theaters">Theaters</Link>,
           },
-          isAdmin && {
+          (isAdmin || isManager) && {
             key: "7",
             icon: <GiTheater />,
             label: <Link to="screens">Screens</Link>,
           },
-          {
+          (isAdmin || isManager) && {
             key: "8",
-            icon: <MdReport />,
-            label: <Link to="report">Report</Link>,
+            icon: <MdChair />,
+            label: <Link to="seats">Seats</Link>,
           },
           isManager && {
             key: "9",

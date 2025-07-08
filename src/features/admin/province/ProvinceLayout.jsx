@@ -14,15 +14,11 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useCreateProvince } from "./useCreateProvince";
 import { useUpdateProvince } from "./useUpdateProvince";
 import ProvinceTable from "./ProvinceTable";
-import AccessDenied from "../../../pages/AccessDenied";
 import { useGetProvinces } from "./useGetProvinces";
-import { useSelector } from "react-redux";
-import { ROLE_ADMIN } from "../../../utils/constant";
 
 const { Title } = Typography;
 
 function ProvinceLayout() {
-  const { user } = useSelector((state) => state.user);
   const { error, refetch } = useGetProvinces();
   const createMutation = useCreateProvince();
   const updateMutation = useUpdateProvince();
@@ -66,8 +62,6 @@ function ProvinceLayout() {
       }
     });
   };
-
-  if (user?.role !== ROLE_ADMIN) return <AccessDenied />;
 
   return (
     <Card>
