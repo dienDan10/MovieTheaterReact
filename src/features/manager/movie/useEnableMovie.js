@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateMovie } from "../../../services/apiMovie";
+import { enableMovie } from "../../../services/apiMovie";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import {
@@ -7,19 +7,19 @@ import {
   SUCCESS_NOTIFICATION,
 } from "../../../utils/constant";
 
-export function useUpdateMovie() {
+export function useEnableMovie() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: updateMovie,
-    onSuccess: (data, variables) => {
+    mutationFn: enableMovie,
+    onSuccess: (data, movieId) => {
       queryClient.invalidateQueries({ queryKey: ["movies"] });
-      queryClient.invalidateQueries({ queryKey: ["movie", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["movie", movieId] });
       dispatch(
         notify({
           type: SUCCESS_NOTIFICATION,
-          message: "Movie updated successfully!",
+          message: "Movie enabled successfully!",
         })
       );
     },
@@ -27,7 +27,7 @@ export function useUpdateMovie() {
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: error.message || "Failed to update movie",
+          message: error.message || "Failed to enable movie",
         })
       );
     },

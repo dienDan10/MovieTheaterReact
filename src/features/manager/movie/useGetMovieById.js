@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { getMovieById } from "../../../services/apiMovie";
 
 export function useGetMovieById(id) {
   const { data, isPending, error } = useQuery({
     queryKey: ["movie", id],
-    queryFn: () => customAxios.get(`/api/movies/${id}`),
+    queryFn: async () => {
+      if (!id) return null;
+      const res = await getMovieById(id);
+      return res.data;
+    },
     enabled: !!id,
   });
 
-  return { movie: data?.data?.data, isPending, error };
+  return { movie: data, isPending, error };
 }

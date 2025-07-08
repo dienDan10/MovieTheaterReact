@@ -1,44 +1,31 @@
 import { useState } from "react";
-import { Table, Button, Space, Input, Popconfirm, message } from "antd";
-import { SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Table, Button, Space, Input, Popconfirm, message, Tag } from "antd";
+import {
+  SearchOutlined,
+  EyeOutlined,
+  EditOutlined,
+  StopOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 import PropTypes from "prop-types";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMovies, deleteMovie as apiDeleteMovie } from "../../../services/apiMovie";
+import { useDispatch, useSelector } from "react-redux";
+import { setFilters } from "../../../redux/movieSlice";
+import { useGetMovies } from "./useGetMovies";
+import { useEnableMovie } from "./useEnableMovie";
+import { useDisableMovie } from "./useDisableMovie";
 
 function MovieTable({ onViewDetails, onEditMovie }) {
-  // Fetch movies
-  const { data, isLoading } = useQuery({
-    queryKey: ["movies"],
-    queryFn: async () => {
-      const res = await getMovies();
-      return res.data;
-    },
-  });
+  const dispatch = useDispatch();
+  const { filters } = useSelector((state) => state.movie);
+  const { pageNumber, pageSize } = filters;
 
-  // Mutations
-  const queryClient = useQueryClient();
-  const deleteMovie = useMutation({
-    mutationFn: async (id) => {
-      await apiDeleteMovie(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["movies"]);
-      message.success("Movie deleted successfully");
-    },
-    onError: (error) => {
-      message.error(`Failed to delete movie: ${error.message || "Unknown error"}`);
-    },
-  });
-  const [deletingId, setDeletingId] = useState(null);
+  // Fetch movies using custom hook
+  const { movies, totalCount, isPending: isLoading } = useGetMovies();
 
-  const [searchText, setSearchText] = useState("");
-
-  // Defensive: ensure data is an array
-  const movieArray = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
-
-  const filteredMovies = movieArray.filter((movie) =>
-    movie.title.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Mutations for enable/disable
+  const enableMovie = useEnableMovie();
+  const disableMovie = useDisableMovie();
+  const [processingId, setProcessingId] = useState(null);
 
   const handleView = (movie) => {
     if (onViewDetails) onViewDetails(movie);
@@ -48,33 +35,70 @@ function MovieTable({ onViewDetails, onEditMovie }) {
     if (onEditMovie) onEditMovie(movie);
   };
 
-  const handleDelete = (id) => {
-    setDeletingId(id);
-    return new Promise((resolve, reject) => {
-      deleteMovie.mutate(id, {
-        onSuccess: () => {
-          resolve();
-          setDeletingId(null);
-        },
-        onError: (error) => {
-          reject(error);
-          setDeletingId(null);
-        },
-      });
+  const handleToggleStatus = (movie) => {
+    setProcessingId(movie.id);
+
+    const toggleAction = movie.isActive ? disableMovie : enableMovie;
+
+    toggleAction.mutate(movie.id, {
+      onSuccess: () => {
+        message.success(
+          `Movie ${movie.isActive ? "disabled" : "enabled"} successfully`
+        );
+        setProcessingId(null);
+      },
+      onError: (error) => {
+        message.error(
+          `Failed to ${movie.isActive ? "disable" : "enable"} movie: ${
+            error.message || "Unknown error"
+          }`
+        );
+        setProcessingId(null);
+      },
     });
+  };
+
+  const handleTableChange = (pagination) => {
+    dispatch(
+      setFilters({
+        pageNumber: pagination.current,
+        pageSize: pagination.pageSize,
+      })
+    );
   };
 
   const columns = [
     {
       title: "Poster",
-      dataIndex: "poster",
+      dataIndex: "posterUrl",
       key: "poster",
       width: 90,
-      render: (poster) =>
-        poster ? (
-          <img src={poster} alt="Poster" style={{ width: 60, height: 90, objectFit: "cover", borderRadius: 4 }} />
+      render: (posterUrl) =>
+        posterUrl ? (
+          <img
+            src={posterUrl}
+            alt="Poster"
+            style={{
+              width: 60,
+              height: 90,
+              objectFit: "cover",
+              borderRadius: 4,
+            }}
+          />
         ) : (
-          <div style={{ width: 60, height: 90, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4, color: '#999', fontSize: 12 }}>
+          <div
+            style={{
+              width: 60,
+              height: 90,
+              background: "#eee",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 4,
+              color: "#999",
+              fontSize: 12,
+            }}
+          >
             No poster
           </div>
         ),
@@ -89,19 +113,36 @@ function MovieTable({ onViewDetails, onEditMovie }) {
       title: "Genre",
       dataIndex: "genre",
       key: "genre",
-      filters: [
-        { text: "Sci-Fi", value: "Sci-Fi" },
-        { text: "Action", value: "Action" },
-        { text: "Adventure", value: "Adventure" },
-      ],
-      onFilter: (value, record) => record.genre === value,
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
+      title: "Director",
+      dataIndex: "director",
+      key: "director",
       ellipsis: true,
-      render: (desc) => desc ? desc : <span style={{ color: '#aaa' }}>No description</span>,
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      render: (duration) => `${duration} mins`,
+      sorter: (a, b) => a.duration - b.duration,
+    },
+    {
+      title: "Status",
+      dataIndex: "isActive",
+      key: "status",
+      width: 100,
+      filters: [
+        { text: "Active", value: true },
+        { text: "Inactive", value: false },
+      ],
+      onFilter: (value, record) => record.isActive === value,
+      render: (isActive) =>
+        isActive ? (
+          <Tag color="green">Active</Tag>
+        ) : (
+          <Tag color="red">Inactive</Tag>
+        ),
     },
     {
       title: "Actions",
@@ -122,20 +163,23 @@ function MovieTable({ onViewDetails, onEditMovie }) {
             title="Edit movie"
           />
           <Popconfirm
-            title="Delete Movie"
-            description="Are you sure you want to delete this movie?"
-            onConfirm={() => handleDelete(record.id)}
+            title={record.isActive ? "Disable Movie" : "Enable Movie"}
+            description={`Are you sure you want to ${
+              record.isActive ? "disable" : "enable"
+            } this movie?`}
+            onConfirm={() => handleToggleStatus(record)}
             okText="Yes"
             cancelText="No"
-            okButtonProps={{ danger: true, loading: deletingId === record.id }}
           >
             <Button
-              icon={<DeleteOutlined />}
+              icon={
+                record.isActive ? <StopOutlined /> : <CheckCircleOutlined />
+              }
               type="link"
-              danger
-              loading={deletingId === record.id}
-              disabled={deletingId !== null}
-              title="Delete movie"
+              danger={record.isActive}
+              loading={processingId === record.id}
+              disabled={processingId !== null}
+              title={record.isActive ? "Disable movie" : "Enable movie"}
             />
           </Popconfirm>
         </Space>
@@ -145,25 +189,19 @@ function MovieTable({ onViewDetails, onEditMovie }) {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-        <Input
-          placeholder="Search movie by title..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className="max-w-xs"
-          allowClear
-        />
-      </div>
       <Table
         columns={columns}
-        dataSource={filteredMovies}
+        dataSource={movies}
         loading={isLoading}
         rowKey="id"
         pagination={{
+          current: pageNumber,
+          pageSize: pageSize,
+          total: totalCount,
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} movies`,
         }}
+        onChange={handleTableChange}
       />
     </div>
   );
