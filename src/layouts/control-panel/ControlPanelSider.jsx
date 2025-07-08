@@ -27,6 +27,8 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("theaters")) return "6";
     if (pathname.includes("screens")) return "7";
     if (pathname.includes("seats")) return "8";
+    if (pathname.includes("movies")) return "9";
+    if (pathname.includes("showtimes")) return "10";
   };
 
   const selectedKey = calcSelectedKey();
@@ -93,12 +95,12 @@ function ControlPanelSider({ collapsed }) {
           isManager && {
             key: "9",
             icon: <RiMovie2AiFill />,
-            label: <Link to="movies">Movie Management</Link>,
+            label: <Link to="movies">Movies</Link>,
           },
           isManager && {
             key: "10",
             icon: <GiTheater />,
-            label: <Link to="showtimes">ShowTime Management</Link>,
+            label: <Link to="showtimes">ShowTimes</Link>,
           },
         ]}
       />

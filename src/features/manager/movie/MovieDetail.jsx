@@ -79,11 +79,11 @@ function MovieDetail({ movieId }) {
   );
 }
 
-MovieDetail.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  movieId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  onEdit: PropTypes.func.isRequired,
-};
+// MovieDetail.propTypes = {
+//   open: PropTypes.bool.isRequired,
+//   onClose: PropTypes.func.isRequired,
+//   movieId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+//   onEdit: PropTypes.func.isRequired,
+// };
 
 export default MovieDetail;
