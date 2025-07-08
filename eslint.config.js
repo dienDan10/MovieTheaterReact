@@ -38,6 +38,8 @@ export default [
         "warn",
         { allowConstantExport: true },
       ],
+      "react-props/no-unused-prop-types": 0, // Disable unused prop types rule
+      "react/prop-types": "off", // Disable prop-types as we use TypeScript
     },
   },
 ];

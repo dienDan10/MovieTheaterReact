@@ -1,0 +1,94 @@
+{
+  "_comment_1": "This data field below is the data return from the request to get showtimes by movie ID, theaterId and by date. Used when customer select a movie to book ticket and the showtimes showup corresponding to the theater",
+  "Data_1": {
+    "theater": {
+      "id": 1,
+      "name": "Galaxy Cinema",
+      "address": "123 Main St, City, Country"
+    },
+    "showtimes": [
+      {
+        "id": 1,
+        "time": "12:00",
+        "ticketPrice": 50000
+      },
+      {
+        "id": 2,
+        "time": "14:00",
+        "ticketPrice": 50000
+      },
+      {
+        "id": 3,
+        "time": "16:00",
+        "ticketPrice": 50000
+      },
+      {
+        "id": 4,
+        "time": "18:00",
+        "ticketPrice": 50000
+      },
+      {
+        "id": 5,
+        "time": "20:00",
+        "ticketPrice": 50000
+      }
+    ]
+  },
+
+  "_comment_2": "This data field below is the data return from the request to get a showtime details, use in booking ticket for customer.",
+  "Data_2": {
+    "id": 1,
+    "movie": {
+      "id": 1,
+      "title": "Avengers: Endgame"
+    },
+    "theater": {
+      "id": 1,
+      "name": "Galaxy Cinema"
+    },
+    "screen": {
+      "id": 1,
+      "name": "Screen 1"
+    },
+    "date": "2023-10-01",
+    "time": "12:00",
+    "ticketPrice": 50000,
+    "seats": [
+      {
+        "id": 1,
+        "seatNumber": "1",
+        "seatRow": "A",
+        "isBooked": false,
+        "isActive": true
+      },
+      {
+        "id": 2,
+        "seatNumber": "2",
+        "seatRow": "A",
+        "isBooked": false,
+        "isActive": true
+      },
+      {
+        "id": 3,
+        "seatNumber": "3",
+        "seatRow": "A",
+        "isBooked": false,
+        "isActive": true
+      },
+      {
+        "id": 4,
+        "seatNumber": "4",
+        "seatRow": "A",
+        "isBooked": false,
+        "isActive": true
+      },
+      {
+        "id": 5,
+        "seatNumber": "5",
+        "seatRow": "A",
+        "isBooked": false,
+        "isActive": true
+      }
+    ]
+  }
+}

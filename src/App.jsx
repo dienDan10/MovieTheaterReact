@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
 
+// Lazy load components to optimize performance
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ControlPanelLayout = lazy(() =>
@@ -42,6 +43,12 @@ const DashboardLayout = lazy(() =>
   import("./features/manager/dashboard/DashboardLayout")
 );
 const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
+const BookingLayout = lazy(() =>
+  import("./features/customer/booking/BookingLayout")
+);
+const ViewShowtimeLayout = lazy(() =>
+  import("./features/customer/showtime/ViewShowtimeLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -49,6 +56,10 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <PageNotFound />,
     children: [
+      {
+        index: true,
+        element: <Navigate to="/home" replace />,
+      },
       {
         path: "login",
         element: (
@@ -66,14 +77,26 @@ const router = createBrowserRouter([
         ),
       },
       {
-        index: true,
-        element: <Navigate to="/home" replace />,
-      },
-      {
         path: "home",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "booking/:showtimeId",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <BookingLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "showtimes/:movieId",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ViewShowtimeLayout />
           </Suspense>
         ),
       },

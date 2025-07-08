@@ -1,88 +1,109 @@
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Card, Button, Typography, Space, Drawer } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import MovieTable from "./MovieTable";
 import MovieDetail from "./MovieDetail";
 import MovieForm from "./MovieForm";
+import MovieFilter from "./MovieFilter";
+import {
+  toggleDetailsVisibility,
+  setSelectedMovie,
+  clearSelectedMovie,
+  toggleFormVisibility,
+  setFormMode,
+} from "../../../redux/movieSlice";
 
 const { Title } = Typography;
 
 function MovieLayout() {
-  // Detail drawer state
-  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
-  const [selectedMovieId, setSelectedMovieId] = useState(null);
+  const dispatch = useDispatch();
 
-  // Form modal state
-  const [formModalOpen, setFormModalOpen] = useState(false);
-  const [formMode, setFormMode] = useState("create"); // "create" or "edit"
-  const [editMovieId, setEditMovieId] = useState(null);
-
+  // Get state from Redux
+  const { detailsVisible, selectedMovie, formVisible, formMode } = useSelector(
+    (state) => state.movie
+  );
 
   // Handle viewing movie details
   const handleViewDetails = (movie) => {
-    setSelectedMovieId(movie?.id);
-    setDetailDrawerOpen(true);
+    dispatch(setSelectedMovie(movie));
+    dispatch(toggleDetailsVisibility(true));
   };
 
   // Handle creating a new movie
   const handleCreateMovie = () => {
-    setFormMode("create");
-    setEditMovieId(null);
-    setFormModalOpen(true);
+    dispatch(clearSelectedMovie());
+    dispatch(setFormMode("create"));
+    dispatch(toggleFormVisibility(true));
   };
 
   // Handle editing a movie
   const handleEditMovie = (movie) => {
-    setFormMode("edit");
-    setEditMovieId(movie?.id);
-    setFormModalOpen(true);
+    dispatch(setSelectedMovie(movie));
+    dispatch(setFormMode("edit"));
+    dispatch(toggleFormVisibility(true));
   };
 
   // Handle edit button in detail drawer
   const handleEditFromDetails = () => {
-    setDetailDrawerOpen(false);
-    setFormMode("edit");
-    setEditMovieId(selectedMovieId);
-    setFormModalOpen(true);
+    dispatch(toggleDetailsVisibility(false));
+    dispatch(setFormMode("edit"));
+    dispatch(toggleFormVisibility(true));
   };
 
   // Handle form modal close
   const handleFormClose = () => {
-    setFormModalOpen(false);
-    setFormMode("create");
+    dispatch(toggleFormVisibility(false));
   };
 
   return (
     <>
       <MovieForm
-        open={formModalOpen}
+        open={formVisible}
         onClose={handleFormClose}
-        movieId={editMovieId}
+        movieId={selectedMovie?.id}
         mode={formMode}
       />
       <Card>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Space direction="horizontal" justify="space-between" style={{ width: "100%" }}>
+          <Space
+            direction="horizontal"
+            justify="space-between"
+            style={{ width: "100%" }}
+          >
             <Title level={2}>Movies</Title>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateMovie}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleCreateMovie}
+            >
               Add Movie
             </Button>
           </Space>
+          {/* Movie Filter */}
+          <MovieFilter />
           {/* Movie Table */}
-          <MovieTable onViewDetails={handleViewDetails} onEditMovie={handleEditMovie} />
+          <MovieTable
+            onViewDetails={handleViewDetails}
+            onEditMovie={handleEditMovie}
+          />
           {/* Movie details drawer */}
           <Drawer
             title="Movie Details"
             width={600}
-            open={detailDrawerOpen}
-            onClose={() => setDetailDrawerOpen(false)}
+            open={detailsVisible}
+            onClose={() => dispatch(toggleDetailsVisibility(false))}
             extra={
               <Button type="primary" onClick={handleEditFromDetails}>
                 Edit
               </Button>
             }
           >
-            <MovieDetail open={detailDrawerOpen} onClose={() => setDetailDrawerOpen(false)} movieId={selectedMovieId} onEdit={handleEditMovie} />
+            <MovieDetail
+              movieId={selectedMovie?.id}
+              open={detailsVisible}
+              onClose={() => dispatch(toggleDetailsVisibility(false))}
+              onEdit={handleEditMovie}
+            />
           </Drawer>
         </Space>
       </Card>
