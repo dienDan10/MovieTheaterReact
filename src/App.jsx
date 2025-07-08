@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearNotification } from "./redux/notificationSlice";
 import FetchUserProfile from "./features/auth/FetchUserProfile";
 
+// Lazy load components to optimize performance
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ControlPanelLayout = lazy(() =>
@@ -44,6 +45,9 @@ const DashboardLayout = lazy(() =>
 const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
 const BookingLayout = lazy(() =>
   import("./features/customer/booking/BookingLayout")
+);
+const ViewShowtimeLayout = lazy(() =>
+  import("./features/customer/showtime/ViewShowtimeLayout")
 );
 
 const router = createBrowserRouter([
@@ -85,6 +89,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <BookingLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "showtimes/:movieId",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ViewShowtimeLayout />
           </Suspense>
         ),
       },

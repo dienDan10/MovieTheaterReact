@@ -24,6 +24,13 @@ function BookingDetails() {
     <div className="flex-1 flex flex-col gap-6">
       <Description />
       <TotalPrice />
+      {step === 3 && (
+        <div className="p-4 text-[15px] bg-neutral-50 text-neutral-900 rounded-lg shadow-sm border-2 border-neutral-200">
+          Vé đã mua không thể đổi hoặc hoàn tiền. Mã vé sẽ được gửi{" "}
+          <span className="font-semibold">01</span> lần qua số điện thoại và
+          email đã nhập. Vui lòng kiểm tra lại thông tin trước khi tiếp tục.
+        </div>
+      )}
       <div className="flex flex-row justify-between items-center gap-5">
         <button
           className={`flex-1 flex items-center justify-center px-6 py-2 border-1 rounded-lg border-neutral-300 transition-colors duration-200 ${
