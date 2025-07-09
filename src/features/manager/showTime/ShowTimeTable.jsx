@@ -2,8 +2,8 @@ import { Table, Button } from "antd";
 import useGetShowTimes from "./useGetShowTimes";
 import PropTypes from "prop-types";
 
-function ShowTimeTable({ onEdit, onDetail }) {
-  const { data, isLoading } = useGetShowTimes();
+function ShowTimeTable({ onEdit, onDetail, dateRange, movieId, screenId }) {
+  const { data, isLoading } = useGetShowTimes(dateRange, movieId, screenId);
 
   const columns = [
     { title: "ID", dataIndex: "id", key: "id" },

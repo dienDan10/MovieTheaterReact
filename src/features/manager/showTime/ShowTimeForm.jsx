@@ -1,27 +1,71 @@
 import { Modal, Form, Input, InputNumber, DatePicker, TimePicker, Button, Spin, Select, Space } from "antd";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useWatch } from "antd/es/form/Form";
 import useCreateShowTime from "./useCreateShowTime";
 import useUpdateShowTime from "./useUpdateShowTime";
 import useGetShowTimeById from "./useGetShowTimeById";
 import { useGetMovies } from "../../manager/movie/useGetMovies";
 import useGetScreens from "./useGetScreens";
+import useGetShowTimes from "./useGetShowTimes";
 import dayjs from "dayjs";
 
-function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
+function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date, theaterId, existingSlots = [] }) {
   const [form] = Form.useForm();
   const isEdit = mode === "edit";
   const { data: showTime, isLoading } = useGetShowTimeById(showTimeId, isEdit && open);
   const createMutation = useCreateShowTime();
   const updateMutation = useUpdateShowTime();
   const [submitting, setSubmitting] = useState(false);
-
+  // Lock fields if passed as props (KHAI BÁO TRƯỚC TIÊN)
+  const isMovieLocked = !!movieId;
+  const isScreenLocked = !!screenId;
+  const isDateLocked = !!date;
+  // Thêm state cho lockedSlots động
+  const [dynamicLockedSlots, setDynamicLockedSlots] = useState([]);
   // Lấy danh sách phim và màn hình
   const { movies = [] } = useGetMovies();
-  const { data: screensData } = useGetScreens();
-  const screens = Array.isArray(screensData) ? screensData : (screensData?.data || []);
+  const { data: screensData } = useGetScreens(theaterId);
+  const screens = useMemo(() => Array.isArray(screensData) ? screensData : (screensData?.data || []), [screensData]);
+  // Locked slots: các slot đã có, không cho sửa/xóa
+  const lockedSlots = useMemo(() => {
+    if (!isMovieLocked && !isScreenLocked && !isDateLocked) return dynamicLockedSlots;
+    return Array.isArray(existingSlots) ? existingSlots.map(slot => ({
+      startTime: dayjs(slot.startTime, slot.startTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+      endTime: dayjs(slot.endTime, slot.endTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm')
+    })) : [];
+  }, [dynamicLockedSlots, existingSlots, isMovieLocked, isScreenLocked, isDateLocked]);
   const [selectedMovie, setSelectedMovie] = useState(null);
+  // Tách slot đã có (không cho sửa/xóa) và slot mới
   const [timeSlots, setTimeSlots] = useState([{ startTime: null, endTime: null }]);
+  // State cho inline editing
+  // Theo dõi movieId, screenId, date động (chỉ khi không bị lock)
+  const watchedMovieId = useWatch('movieId', form);
+  const watchedScreenId = useWatch('screenId', form);
+  const watchedDate = useWatch('date', form);
+  const formMovieId = isMovieLocked ? movieId : watchedMovieId;
+  const formScreenId = isScreenLocked ? screenId : watchedScreenId;
+  const formDate = isDateLocked ? date : (watchedDate ? (typeof watchedDate === 'string' ? watchedDate : dayjs(watchedDate).format('YYYY-MM-DD')) : undefined);
+
+  // Gọi API lấy showtime khi đã chọn đủ movie, screen, date (chỉ khi không bị lock)
+  const shouldFetchDynamicSlots = !isMovieLocked && !isScreenLocked && !isDateLocked && formMovieId && formScreenId && formDate;
+  const { data: dynamicShowTimes } = useGetShowTimes(
+    formDate ? [dayjs(formDate), dayjs(formDate)] : undefined,
+    formMovieId,
+    formScreenId
+  );
+  useEffect(() => {
+    if (shouldFetchDynamicSlots && dynamicShowTimes && Array.isArray(dynamicShowTimes.data)) {
+      // Lấy các slot của movie/screen/date
+      const slots = dynamicShowTimes.data.map(st => ({
+        startTime: dayjs(st.startTime, st.startTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+        endTime: dayjs(st.endTime, st.endTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm')
+      }));
+      setDynamicLockedSlots(slots);
+    } else if (!shouldFetchDynamicSlots) {
+      setDynamicLockedSlots([]);
+    }
+  }, [shouldFetchDynamicSlots, dynamicShowTimes]);
 
   useEffect(() => {
     if (showTime && isEdit) {
@@ -42,12 +86,20 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
         endTime: endTimes[idx] ? dayjs(endTimes[idx].ticks / 10000 - 621355968000000000) : null,
       }));
       setTimeSlots(newTimeSlots);
-    } else if (open && !isEdit && movieId && movies.length > 0) {
-      // Pre-select movie if movieId is provided in create mode and movies are loaded
-      form.setFieldsValue({ movieId });
-      setSelectedMovie(movies.find(m => m.id === movieId));
+    } else if (open && mode === "create") {
+      // Set locked fields if provided
+      if (movieId && movies.length > 0) {
+        form.setFieldsValue({ movieId });
+        setSelectedMovie(movies.find(m => m.id === movieId));
+      }
+      if (screenId && screens.length > 0) {
+        form.setFieldsValue({ screenId });
+      }
+      if (date) {
+        form.setFieldsValue({ date: dayjs(date) });
+      }
     }
-  }, [showTime, form, isEdit, movies, open, movieId]);
+  }, [showTime, form, isEdit, movies, open, movieId, screenId, date, screens, mode]);
 
   useEffect(() => {
     if (open && !isEdit && !movieId) {
@@ -69,18 +121,59 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
     setTimeSlots([...timeSlots, { startTime: null, endTime: null }]);
   };
   const handleRemoveTimeSlot = (idx) => {
-    setTimeSlots(timeSlots.filter((_, i) => i !== idx));
+    const newSlots = timeSlots.filter((_, i) => i !== idx);
+    setTimeSlots(newSlots.length === 0 ? [{ startTime: null, endTime: null }] : newSlots);
   };
-  // Update time slot value and auto-calculate endTime
-  const handleTimeSlotChange = (idx, field, value) => {
-    const newSlots = [...timeSlots];
-    newSlots[idx][field] = value;
-    // Auto-calculate endTime if startTime or movie changes
-    if (field === 'startTime' && selectedMovie && selectedMovie.duration && value) {
-      newSlots[idx].endTime = value.clone().add(selectedMovie.duration, 'minute');
+
+  // Handle start time change and auto-calc end time
+  const handleStartTimeChange = (idx, value) => {
+    setTimeSlots(slots => {
+      const newSlots = [...slots];
+      newSlots[idx].startTime = value;
+      if (selectedMovie && selectedMovie.duration && value) {
+        newSlots[idx].endTime = value.clone().add(selectedMovie.duration, 'minute');
+      } else {
+        newSlots[idx].endTime = null;
+      }
+      return newSlots;
+    });
+  };
+
+  // Validate slot gap (at least 10 minutes between slots)
+  const [slotGapError, setSlotGapError] = useState("");
+  // Validate if at least one slot is filled
+  const [slotEmptyError, setSlotEmptyError] = useState("");
+  useEffect(() => {
+    // Combine all slots for validation (locked + new)
+    const allSlots = [
+      ...lockedSlots.map((slot, idx) => ({ ...slot, _idx: `locked-${idx}`, locked: true })),
+      ...timeSlots.map((slot, idx) => ({ ...slot, _idx: idx, locked: false }))
+    ];
+    // Only validate slot gap if all slots have startTime and endTime
+    if (
+      allSlots.length > 1 &&
+      allSlots.every(slot => slot.startTime && slot.endTime)
+    ) {
+      const sortedSlots = [...allSlots].sort((a, b) => a.startTime.valueOf() - b.startTime.valueOf());
+      for (let i = 1; i < sortedSlots.length; i++) {
+        const prev = sortedSlots[i - 1];
+        const curr = sortedSlots[i];
+        if (prev.endTime && curr.startTime && curr.startTime.diff(prev.endTime, 'minute') < 10) {
+          setSlotGapError('Each slot must start at least 10 minutes after the previous slot ends.');
+          // Remove slotGapErrorIdx logic, just continue
+          setSlotEmptyError("");
+          return;
+        }
+      }
     }
-    setTimeSlots(newSlots);
-  };
+    setSlotGapError("");
+    // Validate at least one slot has startTime and endTime (chỉ tính slot mới)
+    if (!timeSlots.some(slot => slot.startTime && slot.endTime)) {
+      setSlotEmptyError('Please add at least one valid showtime slot.');
+    } else {
+      setSlotEmptyError("");
+    }
+  }, [timeSlots, lockedSlots]);
 
   // When movie changes, recalculate all endTimes
   useEffect(() => {
@@ -94,20 +187,56 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
     }
   }, [selectedMovie]);
 
+  // Track form validation state
+  // Removed unused setFormValid state
+  // Track if user has interacted with the form
+  const [formTouched, setFormTouched] = useState(false);
+  useEffect(() => {
+    if (!formTouched) return; // Only validate after user interaction
+    const checkForm = async () => {
+      try {
+        await form.validateFields();
+        // Check slot gap error
+        // No setFormValid needed
+      } catch {
+        // No setFormValid needed
+      }
+    };
+    checkForm();
+  }, [form, timeSlots, slotGapError, formTouched]);
+
+  // Reset formTouched về false khi mở form
+  useEffect(() => {
+    if (open) setFormTouched(false);
+  }, [open]);
+
+  // Mark form as touched on any change
+  useEffect(() => {
+    if (open) {
+      const unsubscribe = form.subscribe?.(() => setFormTouched(true));
+      return () => unsubscribe?.();
+    }
+  }, [form, open]);
+
+  // Also validate on submit
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      // Validate all time slots
-      for (let i = 0; i < timeSlots.length; i++) {
-        const slot = timeSlots[i];
-        if (!slot.startTime || !slot.endTime) {
-          throw new Error("Please select start time for all slots");
-        }
-        if (slot.endTime.isBefore(slot.startTime)) {
-          throw new Error("End time must be after start time");
-        }
-        if (selectedMovie && slot.endTime.diff(slot.startTime, 'minute') < selectedMovie.duration) {
-          throw new Error(`Slot #${i+1}: Duration must >= movie duration (${selectedMovie.duration} minutes)`);
+      // Nếu có lỗi slot hoặc slotEmptyError thì không submit
+      if (slotGapError || slotEmptyError) {
+        // Đã có lỗi, chỉ hiển thị lỗi, không submit
+        return;
+      }
+      // Sort slots by startTime for validation
+      const sortedSlots = [...timeSlots].sort((a, b) => {
+        if (!a.startTime || !b.startTime) return 0;
+        return a.startTime.valueOf() - b.startTime.valueOf();
+      });
+      for (let i = 1; i < sortedSlots.length; i++) {
+        const prev = sortedSlots[i - 1];
+        const curr = sortedSlots[i];
+        if (prev.endTime && curr.startTime && curr.startTime.diff(prev.endTime, 'minute') < 10) {
+          throw new Error('Each slot must start at least 10 minutes after the previous slot ends.');
         }
       }
       setSubmitting(true);
@@ -121,7 +250,7 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
         updateMutation.mutate(
           { id: showTimeId, ...submitValues },
           {
-            onSuccess: () => onClose(true),
+            onSuccess: () => handleClose(true),
             onSettled: () => setSubmitting(false),
           }
         );
@@ -140,105 +269,135 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
           showTimes,
           ticketPrice: Number(values.ticketPrice),
         }, {
-          onSuccess: () => onClose(true),
+          onSuccess: () => handleClose(true),
           onSettled: () => setSubmitting(false),
         });
       }
     } catch (err) {
-      // Nếu validateFields lỗi thì không làm gì, form sẽ tự hiển thị lỗi
       if (err instanceof Error) {
-        form.setFields([{ name: 'timeSlots', errors: [err.message] }]);
+        // Chỉ hiển thị lỗi của Ant Design
+        form.setFields([
+          {
+            name: 'date',
+            errors: err.message.includes('date') ? [err.message] : [],
+          },
+          {
+            name: 'movieId',
+            errors: err.message.includes('movie') ? [err.message] : [],
+          },
+          {
+            name: 'screenId',
+            errors: err.message.includes('screen') ? [err.message] : [],
+          },
+          {
+            name: 'ticketPrice',
+            errors: err.message.includes('price') ? [err.message] : [],
+          },
+        ]);
       }
-      console.error("Validation failed:", err);
     }
   };
 
-  const isSubmitting = submitting || createMutation.isPending || updateMutation.isPending;
-  const modalTitle = isEdit ? "Edit ShowTime" : "Create ShowTime";
+  const handleClose = (refresh = false) => {
+    setSubmitting(false);
+    onClose(refresh);
+  };
+
+  if (isLoading) return <Spin />;
 
   return (
     <Modal
-      title={modalTitle}
       open={open}
-      onCancel={() => onClose(false)}
-      footer={[
-        <Button key="cancel" onClick={() => onClose(false)} disabled={isSubmitting}>
-          Cancel
-        </Button>,
-        <Button key="submit" type="primary" loading={isSubmitting} onClick={handleSubmit} disabled={isSubmitting || (isEdit && isLoading)}>
-          {isEdit ? "Update" : "Create"}
-        </Button>,
-      ]}
-      maskClosable={!isSubmitting}
-      closable={!isSubmitting}
+      title={isEdit ? "Edit Showtime" : "Create Showtime"}
+      onCancel={handleClose}
+      footer={null}
+      width={800}
     >
-      <Spin spinning={isEdit && isLoading}>
-        <Form form={form} layout="vertical" disabled={isSubmitting}>
-          <Form.Item name="movieId" label="Movie" rules={[{ required: true, message: "Please select a movie" }]}> 
-            <Select
-              showSearch
-              placeholder="Select a movie"
-              optionFilterProp="children"
-              onChange={handleMovieChange}
-              filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-            >
-              {movies.map(movie => (
-                <Select.Option key={movie.id} value={movie.id}>{movie.title}</Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="screenId" label="Screen" rules={[{ required: true, message: "Please select a screen" }]}> 
-            <Select
-              showSearch
-              placeholder="Select a screen"
-              optionFilterProp="children"
-              filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-            >
-              {screens.map(screen => (
-                <Select.Option key={screen.id} value={screen.id}>{screen.name}</Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select date" }]}> 
-            <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
-          </Form.Item>
-          <Form.Item label="Showtime Slots" required>
-            {timeSlots.map((slot, idx) => (
-              <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                <TimePicker
-                  value={slot.startTime}
-                  onChange={v => handleTimeSlotChange(idx, 'startTime', v)}
-                  format="HH:mm"
-                  placeholder="Start Time"
-                  style={{ width: 100 }}
-                />
-                <TimePicker
-                  value={slot.endTime}
-                  format="HH:mm"
-                  placeholder="End Time"
-                  style={{ width: 100 }}
-                  disabled
-                />
-                {timeSlots.length > 1 && (
-                  <Button danger onClick={() => handleRemoveTimeSlot(idx)} size="small">Remove</Button>
-                )}
-              </Space>
-            ))}
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form.Item label="Movie" name="movieId" rules={[{ required: true, message: 'Please select a movie.' }]}>
+          <Select
+            placeholder="Select a movie"
+            onChange={handleMovieChange}
+            disabled={isMovieLocked}
+            options={movies.map(m => ({ label: m.title, value: m.id }))}
+          />
+        </Form.Item>
+        <Form.Item label="Screen" name="screenId" rules={[{ required: true, message: 'Please select a screen.' }]}>
+          <Select
+            placeholder="Select a screen"
+            disabled={isScreenLocked}
+            options={screens.map(s => ({ label: s.name, value: s.id }))}
+          />
+        </Form.Item>
+        <Form.Item label="Date" name="date" rules={[{ required: true, message: 'Please select a date.' }]}>
+          <DatePicker
+            format="YYYY-MM-DD"
+            disabled={isDateLocked}
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+        <Form.Item label="Ticket Price" name="ticketPrice" rules={[{ required: true, message: 'Please enter a ticket price.' }]}>
+          <InputNumber
+            min={1}
+            placeholder="Enter ticket price"
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+        <Form.Item label="Showtime Slots" required>
+          {/* Locked slots (không cho sửa/xóa) */}
+          {lockedSlots.map((slot, idx) => (
+            <Space key={"locked-"+idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+              <TimePicker
+                value={slot.startTime}
+                format="HH:mm"
+                placeholder="Start Time"
+                style={{ width: 100, background: '#f5f5f5' }}
+                disabled
+              />
+              <TimePicker
+                value={slot.endTime}
+                format="HH:mm"
+                placeholder="End Time"
+                style={{ width: 100, background: '#f5f5f5' }}
+                disabled
+              />
+              <span style={{ color: '#888', fontSize: 12 }}>(Existing)</span>
+            </Space>
+          ))}
+          {/* Editable slots */}
+          {timeSlots.map((slot, idx) => (
+            <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+              <TimePicker
+                value={slot.startTime}
+                onChange={v => handleStartTimeChange(idx, v)}
+                format="HH:mm"
+                placeholder="Start Time"
+                style={{ width: 100 }}
+              />
+              <TimePicker
+                value={slot.endTime}
+                format="HH:mm"
+                placeholder="End Time"
+                style={{ width: 100, background: '#f5f5f5' }}
+                disabled
+              />
+              <Button danger onClick={() => handleRemoveTimeSlot(idx)} size="small">Remove</Button>
+            </Space>
+          ))}
+          {slotGapError ? (
+            <div style={{ color: 'red', marginTop: 8, fontWeight: 500 }}>{slotGapError}</div>
+          ) : slotEmptyError ? (
+            <div style={{ color: 'red', marginTop: 8, fontWeight: 500 }}>{slotEmptyError}</div>
+          ) : (
             <Button type="dashed" onClick={handleAddTimeSlot} block size="small">+ Add Slot</Button>
-          </Form.Item>
-          <Form.Item 
-            name="ticketPrice" 
-            label="Ticket Price" 
-            rules={[ 
-              { required: true, message: "Please enter ticket price" },
-              { type: "number", min: 1, message: "Ticket price must be greater than 0" }
-            ]}
-            validateTrigger={['onChange', 'onBlur']}
-          > 
-            <InputNumber min={1} style={{ width: "100%" }} placeholder="Enter ticket price" /> 
-          </Form.Item>
-        </Form>
-      </Spin>
+          )}
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={submitting} style={{ width: '100%' }}>
+            {isEdit ? "Update Showtime" : "Create Showtime"}
+          </Button>
+        </Form.Item>
+      </Form>
     </Modal>
   );
 }
@@ -246,9 +405,13 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId }) {
 ShowTimeForm.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  showTimeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  mode: PropTypes.oneOf(["edit", "create"]).isRequired,
-  movieId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  showTimeId: PropTypes.string,
+  mode: PropTypes.oneOf(["create", "edit"]).isRequired,
+  movieId: PropTypes.string,
+  screenId: PropTypes.string,
+  date: PropTypes.string,
+  theaterId: PropTypes.string.isRequired,
+  existingSlots: PropTypes.array,
 };
 
 export default ShowTimeForm;

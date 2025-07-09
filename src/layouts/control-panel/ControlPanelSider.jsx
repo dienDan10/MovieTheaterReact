@@ -8,7 +8,6 @@ import { FaLocationDot } from "react-icons/fa6";
 import { RiMovie2AiFill } from "react-icons/ri";
 import { GiTheater } from "react-icons/gi";
 
-// eslint-disable-next-line react/prop-types
 function ControlPanelSider({ collapsed }) {
   const location = useLocation();
   const { user } = useSelector((state) => state.user);
