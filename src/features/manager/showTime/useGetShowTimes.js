@@ -19,7 +19,6 @@ const useGetShowTimes = (dateRange, movieId, screenId) => {
         startDate = dateRange[0]?.format("YYYY-MM-DD");
         endDate = dateRange[1]?.format("YYYY-MM-DD");
       }
-      console.log("[useGetShowTimes] startDate:", startDate, "endDate:", endDate, "movieId:", movieId, "screenId:", screenId);
       return await getShowTimes({ startDate, endDate, movieId, screenId });
     },
     keepPreviousData: true,

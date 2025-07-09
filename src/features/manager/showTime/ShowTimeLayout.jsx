@@ -33,7 +33,12 @@ function ShowTimeLayout() {
   const [pendingScreenFilter, setPendingScreenFilter] = useState();
 
   // Lấy dữ liệu showtime thực tế
-  const { data: showTimes = [] } = useGetShowTimes(dateRange, undefined, screenFilter);
+  const shouldFetchShowTimes = !!screenFilter && screenFilter !== undefined && screenFilter !== '';
+  const { data: showTimes = [] } = useGetShowTimes(
+    shouldFetchShowTimes ? dateRange : undefined,
+    undefined,
+    shouldFetchShowTimes ? screenFilter : undefined
+  );
   // Lấy danh sách phim
   const { movies = [] } = useGetMovies();
   const deleteShowTimeMutation = useDeleteShowTime();
@@ -314,15 +319,15 @@ function ShowTimeLayout() {
               />
             </div>
             <div style={{
-              maxHeight: 640, // Increased height for larger groupedShowTimes area
-              minHeight: 400, // Ensure a minimum height for visual impact
+              maxHeight: 900, // Increased height for larger groupedShowTimes area
+              minHeight: 600, // Ensure a larger minimum height for visual impact
               overflowY: 'auto',
-              paddingRight: 16, // More padding for scroll
+              paddingRight: 32, // More padding for scroll
               background: '#fff',
-              borderRadius: 12, // Slightly larger border radius
-              border: '1.5px solid #e0e0e0', // Slightly bolder border
-              marginBottom: 16,
-              boxShadow: '0 4px 24px 0 #e6f7ff', // Subtle shadow for emphasis
+              borderRadius: 16, // Larger border radius
+              border: '2px solid #e0e0e0', // Bolder border
+              marginBottom: 24,
+              boxShadow: '0 8px 32px 0 #e6f7ff', // Stronger shadow for emphasis
               transition: 'max-height 0.3s, min-height 0.3s',
             }}>
               {pagedGroups.length === 0 && (

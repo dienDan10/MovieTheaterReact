@@ -22,10 +22,11 @@ const useUpdateShowTime = () => {
       );
     },
     onError: (error) => {
+      const apiMsg = error?.response?.data?.message;
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: error.message || "Failed to update showtime",
+          message: apiMsg || error.message || "Failed to update showtime",
         })
       );
     },

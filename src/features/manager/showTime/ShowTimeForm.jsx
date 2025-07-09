@@ -77,15 +77,23 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
         ticketPrice: data.ticketPrice,
       });
       setSelectedMovie(movies.find(m => m.id === data.movieId));
-      // Set time slots
-      const slots = data.showTimes?.[0] || {};
-      const startTimes = slots.startTimes || [];
-      const endTimes = slots.endTimes || [];
-      const newTimeSlots = startTimes.map((startTime, idx) => ({
-        startTime: dayjs(startTime.ticks / 10000 - 621355968000000000),
-        endTime: endTimes[idx] ? dayjs(endTimes[idx].ticks / 10000 - 621355968000000000) : null,
-      }));
-      setTimeSlots(newTimeSlots);
+      // Nếu là edit 1 slot, lấy đúng startTime và endTime của slot đang chọn
+      if (data.startTime && data.endTime) {
+        setTimeSlots([{
+          startTime: dayjs(data.startTime, data.startTime.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+          endTime: dayjs(data.endTime, data.endTime.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+        }]);
+      } else {
+        // fallback: lấy theo kiểu cũ nếu có nhiều slot
+        const slots = data.showTimes?.[0] || {};
+        const startTimes = slots.startTimes || [];
+        const endTimes = slots.endTimes || [];
+        const newTimeSlots = startTimes.map((startTime, idx) => ({
+          startTime: dayjs(startTime.ticks / 10000 - 621355968000000000),
+          endTime: endTimes[idx] ? dayjs(endTimes[idx].ticks / 10000 - 621355968000000000) : null,
+        }));
+        setTimeSlots(newTimeSlots);
+      }
     } else if (open && mode === "create") {
       // Set locked fields if provided
       if (movieId && movies.length > 0) {
@@ -108,6 +116,23 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
       setTimeSlots([{ startTime: null, endTime: null }]);
     }
   }, [open, form, isEdit, movieId]);
+
+  // Khi edit: luôn đảm bảo timeSlots[0] có startTime/endTime từ showTime nếu chưa có (để Update hoạt động)
+  useEffect(() => {
+    if (isEdit && showTime && showTime.data && open) {
+      console.log('[DEBUG] useEffect (edit mode): showTime', showTime, 'timeSlots', timeSlots, 'open', open);
+      const data = showTime.data;
+      if (!timeSlots[0].startTime && data.startTime) {
+        setTimeSlots([
+          {
+            startTime: dayjs(data.startTime, data.startTime.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+            endTime: dayjs(data.endTime, data.endTime.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
+          },
+        ]);
+      }
+    }
+    // eslint-disable-next-line
+  }, [isEdit, showTime, open]);
 
   // Khi chọn movie thì lưu lại để kiểm tra duration
   const handleMovieChange = (value) => {
@@ -144,6 +169,11 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
   // Validate if at least one slot is filled
   const [slotEmptyError, setSlotEmptyError] = useState("");
   useEffect(() => {
+    if (isEdit) {
+      setSlotGapError("");
+      setSlotEmptyError("");
+      return;
+    }
     // Combine all slots for validation (locked + new)
     const allSlots = [
       ...lockedSlots.map((slot, idx) => ({ ...slot, _idx: `locked-${idx}`, locked: true })),
@@ -173,7 +203,7 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
     } else {
       setSlotEmptyError("");
     }
-  }, [timeSlots, lockedSlots]);
+  }, [timeSlots, lockedSlots, isEdit]);
 
   // When movie changes, recalculate all endTimes
   useEffect(() => {
@@ -220,25 +250,14 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
 
   // Also validate on submit
   const handleSubmit = async () => {
+    console.log('[DEBUG] handleSubmit called', { isEdit, timeSlots, formValues: form.getFieldsValue(), submitting });
     try {
       const values = await form.validateFields();
-      // Nếu có lỗi slot hoặc slotEmptyError thì không submit
       if (slotGapError || slotEmptyError) {
-        // Đã có lỗi, chỉ hiển thị lỗi, không submit
+        console.log('[DEBUG] Validation error', { slotGapError, slotEmptyError });
         return;
       }
-      // Sort slots by startTime for validation
-      const sortedSlots = [...timeSlots].sort((a, b) => {
-        if (!a.startTime || !b.startTime) return 0;
-        return a.startTime.valueOf() - b.startTime.valueOf();
-      });
-      for (let i = 1; i < sortedSlots.length; i++) {
-        const prev = sortedSlots[i - 1];
-        const curr = sortedSlots[i];
-        if (prev.endTime && curr.startTime && curr.startTime.diff(prev.endTime, 'minute') < 10) {
-          throw new Error('Each slot must start at least 10 minutes after the previous slot ends.');
-        }
-      }
+      // Không validate conflict/gap khi edit nữa, chỉ validate ở create
       setSubmitting(true);
       if (isEdit) {
         const submitValues = {
@@ -246,7 +265,10 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
           screenId: Number(values.screenId),
           date: values.date ? values.date.format("YYYY-MM-DD") : null,
           ticketPrice: Number(values.ticketPrice),
+          startTime: timeSlots[0]?.startTime ? timeSlots[0].startTime.format('HH:mm:ss') : null,
+          endTime: timeSlots[0]?.endTime ? timeSlots[0].endTime.format('HH:mm:ss') : null,
         };
+        console.log('[DEBUG] Submitting updateMutation', submitValues);
         updateMutation.mutate(
           { id: showTimeId, ...submitValues },
           {
@@ -300,8 +322,17 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
 
   const handleClose = (refresh = false) => {
     setSubmitting(false);
+    form.resetFields();
+    setSelectedMovie(null);
+    setTimeSlots([{ startTime: null, endTime: null }]);
     onClose(refresh);
   };
+
+  // Disable movie/screen/date if locked by props OR nếu slot mới đầu tiên (timeSlots[0]) đã có startTime (tức là user đã nhập slot mới)
+  const hasNewSlotData = !isEdit && timeSlots.length > 0 && timeSlots[0].startTime;
+  const isMovieFieldDisabled = isEdit || isMovieLocked || hasNewSlotData;
+  const isScreenFieldDisabled = isEdit || isScreenLocked || hasNewSlotData;
+  const isDateFieldDisabled = isEdit || isDateLocked || hasNewSlotData;
 
   if (isLoading) return <Spin />;
 
@@ -318,21 +349,21 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
           <Select
             placeholder="Select a movie"
             onChange={handleMovieChange}
-            disabled={isMovieLocked}
+            disabled={isMovieFieldDisabled}
             options={movies.map(m => ({ label: m.title, value: m.id }))}
           />
         </Form.Item>
         <Form.Item label="Screen" name="screenId" rules={[{ required: true, message: 'Please select a screen.' }]}>
           <Select
             placeholder="Select a screen"
-            disabled={isScreenLocked}
+            disabled={isScreenFieldDisabled}
             options={screens.map(s => ({ label: s.name, value: s.id }))}
           />
         </Form.Item>
         <Form.Item label="Date" name="date" rules={[{ required: true, message: 'Please select a date.' }]}>
           <DatePicker
             format="YYYY-MM-DD"
-            disabled={isDateLocked}
+            disabled={isDateFieldDisabled}
             style={{ width: '100%' }}
           />
         </Form.Item>
@@ -345,57 +376,86 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
         </Form.Item>
         <Form.Item label="Showtime Slots" required>
           {/* Locked slots (không cho sửa/xóa) */}
-          {lockedSlots.map((slot, idx) => (
-            <Space key={"locked-"+idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+          {/* Khi edit, không render lockedSlots, chỉ render đúng slot đang edit */}
+          {isEdit ? (
+            <Space style={{ display: 'flex', marginBottom: 8 }} align="baseline">
               <TimePicker
-                value={slot.startTime}
-                format="HH:mm"
-                placeholder="Start Time"
-                style={{ width: 100, background: '#f5f5f5' }}
-                disabled
-              />
-              <TimePicker
-                value={slot.endTime}
-                format="HH:mm"
-                placeholder="End Time"
-                style={{ width: 100, background: '#f5f5f5' }}
-                disabled
-              />
-              <span style={{ color: '#888', fontSize: 12 }}>(Existing)</span>
-            </Space>
-          ))}
-          {/* Editable slots */}
-          {timeSlots.map((slot, idx) => (
-            <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-              <TimePicker
-                value={slot.startTime}
-                onChange={v => handleStartTimeChange(idx, v)}
+                value={timeSlots[0]?.startTime}
+                onChange={v => handleStartTimeChange(0, v)}
                 format="HH:mm"
                 placeholder="Start Time"
                 style={{ width: 100 }}
               />
               <TimePicker
-                value={slot.endTime}
+                value={timeSlots[0]?.endTime}
                 format="HH:mm"
                 placeholder="End Time"
                 style={{ width: 100, background: '#f5f5f5' }}
                 disabled
               />
-              <Button danger onClick={() => handleRemoveTimeSlot(idx)} size="small">Remove</Button>
             </Space>
-          ))}
-          {slotGapError ? (
-            <div style={{ color: 'red', marginTop: 8, fontWeight: 500 }}>{slotGapError}</div>
-          ) : slotEmptyError ? (
-            <div style={{ color: 'red', marginTop: 8, fontWeight: 500 }}>{slotEmptyError}</div>
           ) : (
+            // ...existing code for create mode...
+            <>
+              {lockedSlots.map((slot, idx) => (
+                <Space key={"locked-"+idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <TimePicker
+                    value={slot.startTime}
+                    format="HH:mm"
+                    placeholder="Start Time"
+                    style={{ width: 100, background: '#f5f5f5' }}
+                    disabled
+                  />
+                  <TimePicker
+                    value={slot.endTime}
+                    format="HH:mm"
+                    placeholder="End Time"
+                    style={{ width: 100, background: '#f5f5f5' }}
+                    disabled
+                  />
+                  <span style={{ color: '#888', fontSize: 12 }}>(Existing)</span>
+                </Space>
+              ))}
+              {timeSlots.map((slot, idx) => (
+                <Space key={idx} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <TimePicker
+                    value={slot.startTime}
+                    onChange={v => handleStartTimeChange(idx, v)}
+                    format="HH:mm"
+                    placeholder="Start Time"
+                    style={{ width: 100 }}
+                  />
+                  <TimePicker
+                    value={slot.endTime}
+                    format="HH:mm"
+                    placeholder="End Time"
+                    style={{ width: 100, background: '#f5f5f5' }}
+                    disabled
+                  />
+                  <Button danger onClick={() => handleRemoveTimeSlot(idx)} size="small">Remove</Button>
+                </Space>
+              ))}
+            </>
+          )}
+          {/* Error/validation message */}
+          {!isEdit && (slotGapError || slotEmptyError) && (
+            <div style={{ color: 'red', marginTop: 8, fontWeight: 500 }}>{slotGapError || slotEmptyError}</div>
+          )}
+          {!isEdit && !slotGapError && !slotEmptyError && (
             <Button type="dashed" onClick={handleAddTimeSlot} block size="small">+ Add Slot</Button>
           )}
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={submitting} style={{ width: '100%' }}>
-            {isEdit ? "Update Showtime" : "Create Showtime"}
-          </Button>
+          <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+            <Button onClick={() => handleClose(false)} style={{ marginRight: 8 }}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit" loading={submitting} onClick={() => {
+              console.log('[DEBUG] Update/Create button clicked', { isEdit, submitting });
+            }}>
+              {isEdit ? "Update" : "Create"}
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
     </Modal>
