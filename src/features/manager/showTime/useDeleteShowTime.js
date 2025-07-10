@@ -1,35 +1,46 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { deleteShowTime } from "../../../services/apiShowTime";
 import { useDispatch } from "react-redux";
+import {
+  clearSelectedShowtime,
+  setLoading,
+} from "../../../redux/manageShowtimeSlice";
 import { notify } from "../../../redux/notificationSlice";
-import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
+import {
+  ERROR_NOTIFICATION,
+  SUCCESS_NOTIFICATION,
+} from "../../../utils/constant";
 
-const useDeleteShowTime = () => {
+export default function useDeleteShowTime() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: async (id) => {
-      return customAxios.delete(`/api/showtimes/${id}`);
+    mutationFn: (id) => {
+      dispatch(setLoading({ key: "delete", value: true }));
+      return deleteShowTime(id);
     },
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["showtimes"] });
       dispatch(
         notify({
           type: SUCCESS_NOTIFICATION,
-          message: "ShowTime deleted successfully!",
+          message: "Showtime deleted successfully",
         })
       );
+      queryClient.invalidateQueries("showtimes");
+      dispatch(clearSelectedShowtime());
+      dispatch(setLoading({ key: "delete", value: false }));
     },
+
     onError: (error) => {
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: error.message || "Failed to delete showtime",
+          message: `Failed to delete showtime: ${error.message}`,
         })
       );
+      dispatch(setLoading({ key: "delete", value: false }));
     },
   });
-};
-
-export default useDeleteShowTime;
+}

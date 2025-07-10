@@ -1,30 +1,40 @@
+import { Card } from "antd";
+import { EnvironmentOutlined } from "@ant-design/icons";
 import Showtime from "./Showtime";
+function ShowtimeCard({ theater }) {
+  if (!theater) return null;
 
-function ShowtimeCard() {
+  const checkIsShowtimePast = (startTime) => {
+    const [hours, minutes] = startTime.split(":").map(Number);
+    const showtime = new Date();
+    showtime.setHours(hours, minutes, 0);
+    return showtime < new Date();
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4">
-      <h4 className="font-semibold mb-2 text-red-600">Beta Trần Quang Khải</h4>
-      <p className="text-sm text-gray-600 mb-4">
-        Tầng 2 & 3, Toà nhà IMC, 62 Đường Trần Quang Khải, Phường Tân Định, Quận
-        1, TP. Hồ Chí Minh
-      </p>
-
+    <Card className="rounded-lg shadow-md">
       <div className="mb-4">
-        <h5 className="font-medium mb-2">Showtimes</h5>
-        <div className="flex flex-wrap gap-2">
-          <Showtime isActive={false} time={"09:00"} price={""} />
-          <Showtime isActive={false} time={"10:30"} price={""} />
-          <Showtime isActive={false} time={"12:00"} price={""} />
-          <Showtime isActive={false} time={"13:30"} price={""} />
-          <Showtime isActive={true} time={"15:00"} price={"50K"} />
-          <Showtime isActive={true} time={"16:30"} price={"50K"} />
-          <Showtime isActive={true} time={"18:00"} price={"50K"} />
-          <Showtime isActive={true} time={"19:30"} price={"50K"} />
-          <Showtime isActive={true} time={"21:00"} price={"50K"} />
-          <Showtime isActive={true} time={"22:30"} price={"50K"} />
-        </div>
+        <h3 className="text-xl font-semibold text-red-600">
+          {theater.theaterName}
+        </h3>
+        <p className="text-gray-600 flex items-start mt-1">
+          <EnvironmentOutlined className="mt-1 mr-1 flex-shrink-0" />
+          <span>{theater.theaterAddress}</span>
+        </p>
       </div>
-    </div>
+
+      <div className="flex flex-wrap gap-2">
+        {theater.showTimes.map((showtime) => (
+          <Showtime
+            key={showtime.id}
+            id={showtime.id}
+            time={showtime.startTime}
+            price={`${showtime.ticketPrice / 1000}K`}
+            isActive={!checkIsShowtimePast(showtime.startTime)}
+          />
+        ))}
+      </div>
+    </Card>
   );
 }
 

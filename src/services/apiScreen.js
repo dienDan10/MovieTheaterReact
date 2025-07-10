@@ -5,6 +5,11 @@ export const getScreens = async (theaterId) => {
   return response.data;
 };
 
+export const getScreenById = async (id) => {
+  const response = await axios.get(`/api/screens/${id}`);
+  return response.data;
+};
+
 export const createScreen = async ({ name, theaterId, rows, columns }) => {
   const response = await axios.post("api/screens", {
     name,

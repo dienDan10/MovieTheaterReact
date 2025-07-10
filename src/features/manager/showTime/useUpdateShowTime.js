@@ -1,36 +1,46 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { updateShowTime } from "../../../services/apiShowTime";
 import { useDispatch } from "react-redux";
+import {
+  clearSelectedShowtime,
+  setLoading,
+} from "../../../redux/manageShowtimeSlice";
 import { notify } from "../../../redux/notificationSlice";
-import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
+import {
+  ERROR_NOTIFICATION,
+  SUCCESS_NOTIFICATION,
+} from "../../../utils/constant";
 
-const useUpdateShowTime = () => {
+export default function useUpdateShowTime() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: async (data) => {
-      return customAxios.put(`/api/showtimes/${data.id}`, data);
+    mutationFn: ({ id, startTime, endTime, ticketPrice }) => {
+      dispatch(setLoading({ key: "update", value: true }));
+      return updateShowTime({ id, startTime, endTime, ticketPrice });
     },
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["showtimes"] });
       dispatch(
         notify({
           type: SUCCESS_NOTIFICATION,
-          message: "ShowTime updated successfully!",
+          message: "Showtime updated successfully",
         })
       );
+      queryClient.invalidateQueries("showtimes");
+      dispatch(clearSelectedShowtime());
+      dispatch(setLoading({ key: "update", value: false }));
     },
+
     onError: (error) => {
-      const apiMsg = error?.response?.data?.message;
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: apiMsg || error.message || "Failed to update showtime",
+          message: `Failed to update showtime: ${error.message}`,
         })
       );
+      dispatch(setLoading({ key: "update", value: false }));
     },
   });
-};
-
-export default useUpdateShowTime;
+}

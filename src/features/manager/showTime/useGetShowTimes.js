@@ -1,28 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { getShowTimes } from "../../../services/apiShowTime";
+import { useSelector } from "react-redux";
 
-// Thêm movieId, screenId vào params
-const useGetShowTimes = (dateRange, movieId, screenId) => {
-  // dateRange: [startDayjs, endDayjs]
+export default function useGetShowTimes() {
+  const filters = useSelector((state) => state.manageShowtime.filters);
+
   return useQuery({
-    queryKey: [
-      "showtimes",
-      dateRange?.[0]?.format("YYYY-MM-DD"),
-      dateRange?.[1]?.format("YYYY-MM-DD"),
-      movieId || null,
-      screenId || null
-    ],
-    queryFn: async () => {
-      let startDate, endDate;
-      if (Array.isArray(dateRange) && dateRange.length === 2) {
-        // Only pass date part (no time)
-        startDate = dateRange[0]?.format("YYYY-MM-DD");
-        endDate = dateRange[1]?.format("YYYY-MM-DD");
-      }
-      return await getShowTimes({ startDate, endDate, movieId, screenId });
+    queryKey: ["showtimes", filters],
+    queryFn: () => getShowTimes(filters),
+    enabled: !!filters.startDate && !!filters.endDate && !!filters.screenId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    select: (data) => {
+      return data?.data || [];
     },
-    keepPreviousData: true,
   });
-};
-
-export default useGetShowTimes;
+}
