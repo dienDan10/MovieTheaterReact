@@ -18,3 +18,12 @@ export const login = async ({ email, password }) => {
 
   return res;
 };
+
+export const confirmEmail = async ({ userId, token }) => {
+  const res = await axios.post("/api/auth/confirm-email", {
+    userId,
+    token,
+  });
+
+  return res;
+};

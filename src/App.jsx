@@ -49,6 +49,7 @@ const BookingLayout = lazy(() =>
 const ViewShowtimeLayout = lazy(() =>
   import("./features/customer/showtime/ViewShowtimeLayout")
 );
+const ConfirmEmail = lazy(() => import("./pages/ConfirmEmail"));
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <Register />
+          </Suspense>
+        ),
+      },
+      {
+        path: "confirm-email",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <ConfirmEmail />
           </Suspense>
         ),
       },
