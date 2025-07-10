@@ -61,6 +61,15 @@ function ShowTimeLayout() {
     }
   }, [screens, pendingScreenFilter]);
 
+  // Set default date range: today to 7 days after, but do not trigger request until Apply
+  useEffect(() => {
+    if (!pendingDateRange) {
+      const today = dayjs();
+      const next7 = today.add(7, 'day');
+      setPendingDateRange([today, next7]);
+    }
+  }, [pendingDateRange]);
+
   // Group showtimes theo ngày và movie (mapping movie info)
   const groupedShowTimes = useMemo(() => {
     const showTimeList = Array.isArray(showTimes.data) ? showTimes.data : [];
@@ -164,12 +173,11 @@ function ShowTimeLayout() {
     setSelectedMovieId(movieId);
     setFormModalOpen(true);
     setSelectedShowTimeDate(date); // new state for selected date
-    // Lấy các slot đã có của movie, screen, date
+    // Lấy các slot đã có của screen, date (KHÔNG lọc theo movieId)
     const slots = [];
     const showTimeList = Array.isArray(showTimes.data) ? showTimes.data : [];
     showTimeList.forEach(st => {
       if (
-        st.movieId === movieId &&
         String(st.screenId) === String(screenFilter) &&
         st.date.split("T")[0] === date
       ) {
@@ -217,7 +225,7 @@ function ShowTimeLayout() {
         mode={formMode}
         movieId={selectedMovieId}
         screenId={selectedMovieId ? screenFilter : undefined} // Nếu là nút nhỏ thì lock screen, nút to thì cho chọn
-        date={selectedShowTimeDate || (dateRange && dateRange[0] ? dayjs(dateRange[0]).format('YYYY-MM-DD') : undefined)}
+        date={selectedShowTimeDate} // chỉ truyền nếu có selectedShowTimeDate
         theaterId={theaterId}
         existingSlots={selectedExistingSlots}
       />
@@ -384,78 +392,102 @@ function ShowTimeLayout() {
                               }}
                             >
                               <Space style={{ minWidth: 0 }}>
-                                {movieGroup.showtimes?.map((slot) => (
-                                  <div
-                                    key={slot.id}
-                                    style={{ display: 'inline-block', marginRight: 8, marginBottom: 8, position: 'relative' }}
-                                    onMouseEnter={() => setHoveredSlotId(slot.id)}
-                                    onMouseLeave={() => { if (confirmingSlotId !== slot.id) setHoveredSlotId(null); }}
-                                  >
-                                    <Button
-                                      type="primary"
-                                      shape="round"
-                                      onClick={() => handleSlotClick(slot.id)}
-                                      style={{ marginRight: 0, marginBottom: 2 }}
+                                {movieGroup.showtimes?.map((slot) => {
+                                  const slotDate = dayjs(dateGroup.date, 'YYYY-MM-DD');
+                                  const now = dayjs();
+                                  let isPast = false;
+                                  if (slotDate.isBefore(now, 'day')) {
+                                    isPast = true;
+                                  } else if (slotDate.isSame(now, 'day')) {
+                                    isPast = dayjs(slot.startTime, 'HH:mm:ss').isBefore(now, 'minute');
+                                  }
+                                  return (
+                                    <div
+                                      key={slot.id}
+                                      style={{ display: 'inline-block', marginRight: 8, marginBottom: 8, position: 'relative' }}
+                                      onMouseEnter={() => !isPast && setHoveredSlotId(slot.id)}
+                                      onMouseLeave={() => { if (!isPast && confirmingSlotId !== slot.id) setHoveredSlotId(null); }}
                                     >
-                                      <div style={{ textAlign: 'center', fontWeight: 500 }}>
-                                        {dayjs(slot.startTime, 'HH:mm:ss').format('HH:mm')} - {dayjs(slot.endTime, 'HH:mm:ss').format('HH:mm')}
-                                      </div>
-                                      <div style={{ textAlign: 'center', color: '#fa8c16', fontWeight: 700, fontSize: 15 }}>
-                                        {slot.ticketPrice >= 1000 ? `${Math.round(slot.ticketPrice / 1000)}k` : slot.ticketPrice}
-                                      </div>
-                                    </Button>
-                                    {(hoveredSlotId === slot.id || confirmingSlotId === slot.id) && (
-                                      <Popconfirm
-                                        title="Are you sure to delete this showtime?"
-                                        onConfirm={() => { handleDeleteShowTime(slot.id); setConfirmingSlotId(null); setHoveredSlotId(null); }}
-                                        onCancel={() => setConfirmingSlotId(null)}
-                                        okText="Yes"
-                                        cancelText="No"
-                                        open={confirmingSlotId === slot.id}
-                                        onOpenChange={(visible) => {
-                                          if (visible) setConfirmingSlotId(slot.id);
-                                          else setConfirmingSlotId(null);
+                                      <Button
+                                        type={isPast ? 'default' : 'primary'}
+                                        shape="round"
+                                        onClick={() => handleSlotClick(slot.id)}
+                                        style={{
+                                          marginRight: 0,
+                                          marginBottom: 2,
+                                          background: isPast ? '#d9d9d9' : undefined,
+                                          color: isPast ? '#888' : undefined,
+                                          cursor: 'pointer',
+                                          pointerEvents: 'auto',
+                                          borderColor: isPast ? '#d9d9d9' : undefined,
                                         }}
+                                        disabled={false}
                                       >
-                                        <DeleteOutlined
-                                          style={{
-                                            position: 'absolute',
-                                            top: 4,
-                                            right: 4,
-                                            fontSize: 18,
-                                            color: '#ff4d4f',
-                                            background: '#fff',
-                                            borderRadius: '50%',
-                                            padding: 2,
-                                            boxShadow: '0 1px 4px #ccc',
-                                            cursor: 'pointer',
-                                            zIndex: 2
+                                        <div style={{ textAlign: 'center', fontWeight: 500 }}>
+                                          {dayjs(slot.startTime, 'HH:mm:ss').format('HH:mm')} - {dayjs(slot.endTime, 'HH:mm:ss').format('HH:mm')}
+                                        </div>
+                                        <div style={{ textAlign: 'center', color: '#fa8c16', fontWeight: 700, fontSize: 15 }}>
+                                          {slot.ticketPrice >= 1000 ? `${Math.round(slot.ticketPrice / 1000)}k` : slot.ticketPrice}
+                                        </div>
+                                      </Button>
+                                      {/* Only show delete icon if not past */}
+                                      {!isPast && (hoveredSlotId === slot.id || confirmingSlotId === slot.id) && (
+                                        <Popconfirm
+                                          title="Are you sure to delete this showtime?"
+                                          onConfirm={() => { handleDeleteShowTime(slot.id); setConfirmingSlotId(null); setHoveredSlotId(null); }}
+                                          onCancel={() => setConfirmingSlotId(null)}
+                                          okText="Yes"
+                                          cancelText="No"
+                                          open={confirmingSlotId === slot.id}
+                                          onOpenChange={(visible) => {
+                                            if (visible) setConfirmingSlotId(slot.id);
+                                            else setConfirmingSlotId(null);
                                           }}
-                                          onClick={e => { e.stopPropagation(); setConfirmingSlotId(slot.id); }}
-                                        />
-                                      </Popconfirm>
-                                    )}
-                                  </div>
-                                ))}
+                                        >
+                                          <DeleteOutlined
+                                            style={{
+                                              position: 'absolute',
+                                              top: 4,
+                                              right: 4,
+                                              fontSize: 18,
+                                              color: '#ff4d4f',
+                                              background: '#fff',
+                                              borderRadius: '50%',
+                                              padding: 2,
+                                              boxShadow: '0 1px 4px #ccc',
+                                              cursor: 'pointer',
+                                              zIndex: 2
+                                            }}
+                                            onClick={e => { e.stopPropagation(); setConfirmingSlotId(slot.id); }}
+                                          />
+                                        </Popconfirm>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </Space>
                             </div>
                             {/* Add Showtime button row */}
-                            <div style={{ marginTop: 12, textAlign: 'left' }}>
-                              <Button
-                                type="primary"
-                                style={{
-                                  background: "#52c41a",
-                                  borderColor: "#52c41a",
-                                  color: "#fff",
-                                  fontWeight: 600,
-                                  boxShadow: "0 2px 8px #b7eb8f",
-                                  minWidth: 140
-                                }}
-                                onClick={() => handleAddTime(movieGroup.movie.id, dateGroup.date)}
-                              >
-                                + Add Showtime
-                              </Button>
-                            </div>
+                            {(() => {
+                              const isPastDate = dayjs(dateGroup.date, 'YYYY-MM-DD').isBefore(dayjs(), 'day');
+                              return (
+                                <Button
+                                  type="primary"
+                                  disabled={isPastDate}
+                                  style={{
+                                    background: isPastDate ? '#d9d9d9' : "#52c41a",
+                                    borderColor: isPastDate ? '#d9d9d9' : "#52c41a",
+                                    color: isPastDate ? '#888' : "#fff",
+                                    fontWeight: 600,
+                                    boxShadow: isPastDate ? undefined : "0 2px 8px #b7eb8f",
+                                    minWidth: 140
+                                  }}
+                                  onClick={() => handleAddTime(movieGroup.movie.id, dateGroup.date)}
+                                >
+                                  + Add Showtime
+                                </Button>
+                              );
+                            })()}
                           </Col>
                         </Row>
                       </Card>
@@ -468,7 +500,10 @@ function ShowTimeLayout() {
           {/* chi tiết suất chiếu */}
           <ShowTimeDetail
             open={detailDrawerOpen}
-            onClose={() => setDetailDrawerOpen(false)}
+            onClose={() => {
+              setDetailDrawerOpen(false);
+              setSelectedShowTimeId(null);
+            }}
             showTimeId={selectedShowTimeId}
           />
         </Space>

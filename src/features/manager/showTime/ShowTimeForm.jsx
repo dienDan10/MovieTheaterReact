@@ -51,12 +51,12 @@ function ShowTimeForm({ open, onClose, showTimeId, mode, movieId, screenId, date
   const shouldFetchDynamicSlots = !isMovieLocked && !isScreenLocked && !isDateLocked && formMovieId && formScreenId && formDate;
   const { data: dynamicShowTimes } = useGetShowTimes(
     formDate ? [dayjs(formDate), dayjs(formDate)] : undefined,
-    formMovieId,
+    undefined, // Không truyền movieId
     formScreenId
   );
   useEffect(() => {
     if (shouldFetchDynamicSlots && dynamicShowTimes && Array.isArray(dynamicShowTimes.data)) {
-      // Lấy các slot của movie/screen/date
+      // Lấy các slot đã có của screen + date (không cần movieId)
       const slots = dynamicShowTimes.data.map(st => ({
         startTime: dayjs(st.startTime, st.startTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm'),
         endTime: dayjs(st.endTime, st.endTime?.length > 5 ? 'HH:mm:ss' : 'HH:mm')
