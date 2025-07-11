@@ -1,10 +1,9 @@
 import { useSelector } from "react-redux";
 import AccessDenied from "../../pages/AccessDenied";
-import { ROLE_ADMIN, ROLE_MANAGER } from "../../utils/constant";
+import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../../utils/constant";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
-// eslint-disable-next-line react/prop-types
 function RoleBaseRoute({ children }) {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -16,6 +15,8 @@ function RoleBaseRoute({ children }) {
       navigate("theaters", { replace: false });
     } else if (user?.role === ROLE_MANAGER) {
       navigate("dashboard", { replace: false });
+    } else if (user?.role === ROLE_EMPLOYEE) {
+      navigate("concessions", { replace: false });
     }
   }, [isAuthenticated, user, navigate]);
 
