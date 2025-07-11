@@ -1,18 +1,24 @@
 import { useSelector } from "react-redux";
 
 function TotalPrice() {
-  const { seats, showtime } = useSelector((state) => state.booking);
+  const { seats, showtime, concessions } = useSelector(
+    (state) => state.booking
+  );
 
   let totalPrice = 0;
-  if (seats && showtime) {
+  if (seats && showtime && concessions) {
     seats.forEach((seat) => {
       if (seat.isSelected) {
         totalPrice += showtime?.ticketPrice || 0; // Assuming showtime has a price property
       }
     });
-  }
 
-  console.log("Total Price:", totalPrice);
+    concessions.forEach((concession) => {
+      if (concession.count > 0) {
+        totalPrice += concession.price * concession.count; // Assuming each concession has a price and count
+      }
+    });
+  }
 
   return (
     <div className="p-4 text-[15px] bg-neutral-50 text-neutral-900 rounded-lg shadow-sm border-2 border-neutral-200">

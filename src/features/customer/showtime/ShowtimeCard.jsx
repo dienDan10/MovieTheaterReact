@@ -4,11 +4,19 @@ import Showtime from "./Showtime";
 function ShowtimeCard({ theater }) {
   if (!theater) return null;
 
-  const checkIsShowtimePast = (startTime) => {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const showtime = new Date();
-    showtime.setHours(hours, minutes, 0);
-    return showtime < new Date();
+  const checkIsShowtimePast = (showtime) => {
+    // Get current date and time
+    const now = new Date();
+
+    // Parse showtime date and time
+    const showtimeDate = new Date(showtime.date);
+    const [hours, minutes] = showtime.startTime.split(":").map(Number);
+
+    // Set the hours and minutes on the showtime date
+    showtimeDate.setHours(hours, minutes, 0);
+
+    // Compare with current date and time
+    return showtimeDate < now;
   };
 
   return (
@@ -30,7 +38,7 @@ function ShowtimeCard({ theater }) {
             id={showtime.id}
             time={showtime.startTime}
             price={`${showtime.ticketPrice / 1000}K`}
-            isActive={!checkIsShowtimePast(showtime.startTime)}
+            isActive={!checkIsShowtimePast(showtime)}
           />
         ))}
       </div>

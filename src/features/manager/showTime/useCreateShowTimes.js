@@ -49,11 +49,14 @@ export default function useCreateShowTimes() {
       });
     },
 
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const successCount = response.data.filter((r) => r.success).length;
+      const errorCount = response.data.filter((r) => !r.success).length;
       dispatch(
         notify({
           type: SUCCESS_NOTIFICATION,
-          message: "Showtimes created successfully",
+          message: "Showtime added",
+          description: `${successCount} showtimes added successfully, ${errorCount} failed.`,
         })
       );
       queryClient.invalidateQueries("showtimes");

@@ -9,6 +9,7 @@ const initialState = {
   screen: null,
   showtime: null,
   movie: null,
+  concessions: [],
 };
 
 export const bookingSlice = createSlice({
@@ -43,11 +44,26 @@ export const bookingSlice = createSlice({
       state.seatColumns = seatColumns;
     },
     setShowtimeData: (state, action) => {
-      const { theater, screen, showTime, movie } = action.payload;
+      const { theater, screen, showTime, movie, concessions } = action.payload;
       state.theater = theater;
       state.screen = screen;
       state.showtime = showTime;
       state.movie = movie;
+      state.concessions = concessions.map((c) => ({ ...c, count: 0 })); // Initialize concession count to 0
+    },
+    increaseConcessionCount: (state, action) => {
+      const concessionId = action.payload;
+      const concession = state.concessions.find((c) => c.id === concessionId);
+      if (concession) {
+        concession.count += 1;
+      }
+    },
+    decreaseConcessionCount: (state, action) => {
+      const concessionId = action.payload;
+      const concession = state.concessions.find((c) => c.id === concessionId);
+      if (concession && concession.count > 0) {
+        concession.count -= 1;
+      }
     },
     increaseStep: (state) => {
       if (state.step < 3) state.step += 1;
@@ -72,6 +88,8 @@ export const {
   selectSeat,
   setSeats,
   setShowtimeData,
+  increaseConcessionCount,
+  decreaseConcessionCount,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

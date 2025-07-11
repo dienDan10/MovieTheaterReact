@@ -14,13 +14,15 @@ function Showtime({ isActive, time, price, id }) {
       return;
     }
 
-    dispatch(
-      notify({
-        type: WARNING_NOTIFICATION,
-        message: "Authentication needed!",
-        description: "You need to login to proceed to booking.",
-      })
-    );
+    if (!isAuthenticated) {
+      dispatch(
+        notify({
+          type: WARNING_NOTIFICATION,
+          message: "Please login to book a ticket",
+        })
+      );
+      return;
+    }
   };
 
   return (
