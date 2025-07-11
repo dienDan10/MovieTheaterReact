@@ -18,7 +18,7 @@ function SeatGrid() {
                   (s) => s.seatRow === row && s.seatNumber === col
                 );
 
-                if (!seat || !seat.isActive)
+                if (!seat)
                   return (
                     <div key={`empty-${row}-${col}`} className="w-8 h-8"></div>
                   );

@@ -11,6 +11,7 @@ function Showtime({ isActive, time, price, id }) {
   const handleClick = () => {
     if (isActive && isAuthenticated) {
       navigate(`/booking/${id}`);
+      return;
     }
 
     dispatch(
