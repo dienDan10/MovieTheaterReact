@@ -1,30 +1,51 @@
-import { Select } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Select, Spin } from "antd";
+import { useDispatch } from "react-redux";
+import { setProvinceId } from "../../../redux/showtimeSlice";
+import useGetProvinces from "./useGetProvinces";
 
 function ProvinceSelection() {
-  const [selectedProvince, setSelectedProvince] = useState("hcm");
+  const dispatch = useDispatch();
+  const { data: provincesResponse, isLoading } = useGetProvinces();
+  const [selectedProvince, setSelectedProvince] = useState(1); // default to the first province with id = 1
 
-  // Sample data for provinces in Vietnam
-  const provinces = [
-    { value: "hcm", label: "Tp. Hồ Chí Minh" },
-    { value: "hn", label: "Hà Nội" },
-    { value: "dn", label: "Đà Nẵng" },
-    { value: "ct", label: "Cần Thơ" },
-    { value: "hp", label: "Hải Phòng" },
-    { value: "nt", label: "Nha Trang" },
-    { value: "dl", label: "Đà Lạt" },
-  ];
+  // Set default province once data is loaded
+  useEffect(() => {
+    if (provincesResponse?.data && provincesResponse.data.length > 0) {
+      // Use the first province as default if available
+      const defaultProvince = provincesResponse.data[0]?.id || 1;
+      setSelectedProvince(defaultProvince);
+      dispatch(setProvinceId(defaultProvince));
+    }
+  }, [provincesResponse, dispatch]);
+
+  const handleProvinceChange = (value) => {
+    setSelectedProvince(value);
+    dispatch(setProvinceId(value));
+  };
 
   return (
-    <div className="mb-6 px-5 py-4 bg-white rounded-lg">
-      <Select
-        value={selectedProvince}
-        onChange={(value) => setSelectedProvince(value)}
-        options={provinces}
-        className="w-full"
-        size="large"
-        placeholder="Chọn tỉnh/thành phố"
-      />
+    <div className="mb-6 bg-white p-4 rounded-lg">
+      <label className="block text-gray-700 mb-2">Chọn tỉnh/thành phố:</label>
+      {isLoading ? (
+        <div className="flex items-center">
+          <Spin size="small" className="mr-2" /> Đang tải...
+        </div>
+      ) : (
+        <Select
+          value={selectedProvince}
+          onChange={handleProvinceChange}
+          style={{ width: "100%" }}
+          options={
+            provincesResponse?.data?.map((province) => ({
+              value: province.id,
+              label: province.name,
+            })) || []
+          }
+          placeholder="Chọn tỉnh/thành phố"
+          className="w-full"
+        />
+      )}
     </div>
   );
 }

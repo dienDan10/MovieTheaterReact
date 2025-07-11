@@ -1,6 +1,11 @@
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { MdAccountCircle, MdChair, MdSpaceDashboard } from "react-icons/md";
+import {
+  MdAccountCircle,
+  MdChair,
+  MdFastfood,
+  MdSpaceDashboard,
+} from "react-icons/md";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../../utils/constant";
@@ -8,7 +13,6 @@ import { FaLocationDot } from "react-icons/fa6";
 import { RiMovie2AiFill } from "react-icons/ri";
 import { GiTheater } from "react-icons/gi";
 
-// eslint-disable-next-line react/prop-types
 function ControlPanelSider({ collapsed }) {
   const location = useLocation();
   const { user } = useSelector((state) => state.user);
@@ -16,7 +20,7 @@ function ControlPanelSider({ collapsed }) {
 
   const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
   const isManager = user?.role !== null && user.role === ROLE_MANAGER;
-  // const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
+  const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
 
   const calcSelectedKey = () => {
     if (pathname.includes("dashboard")) return "1";
@@ -29,6 +33,7 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("seats")) return "8";
     if (pathname.includes("movies")) return "9";
     if (pathname.includes("showtimes")) return "10";
+    if (pathname.includes("concessions")) return "11";
   };
 
   const selectedKey = calcSelectedKey();
@@ -101,6 +106,11 @@ function ControlPanelSider({ collapsed }) {
             key: "10",
             icon: <GiTheater />,
             label: <Link to="showtimes">ShowTimes</Link>,
+          },
+          (isManager || isEmployee) && {
+            key: "11",
+            icon: <MdFastfood />,
+            label: <Link to="concessions">Concessions</Link>,
           },
         ]}
       />

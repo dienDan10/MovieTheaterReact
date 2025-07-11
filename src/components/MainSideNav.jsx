@@ -4,7 +4,6 @@ import { RiLoginCircleFill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 
-// eslint-disable-next-line react/prop-types
 function MainSideNav({ isOpen, setIsOpen }) {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   return (
@@ -82,7 +81,7 @@ function MainSideNav({ isOpen, setIsOpen }) {
             to="/manage/movies"
             className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
           >
-            Movie Management
+            Movie 
           </NavLink>
         </li>
         <li className="mr-3">
@@ -90,7 +89,7 @@ function MainSideNav({ isOpen, setIsOpen }) {
             to="/manage/showtimes"
             className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
           >
-            ShowTime Management
+            ShowTime 
           </NavLink>
         </li>
       </ul>

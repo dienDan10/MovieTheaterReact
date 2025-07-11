@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-
 import { Link } from "react-router-dom";
 
 function MovieCard({ movie }) {
@@ -18,7 +16,7 @@ function MovieCard({ movie }) {
           className={`absolute inset-0 bg-black/70 flex items-center justify-center transition-opacity duration-300 opacity-0 hover:opacity-100`}
         >
           <Link
-            to={`/booking/${movie.id}`}
+            to={`/showtimes/${movie.id}`}
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-all duration-200"
           >
             Book Ticket

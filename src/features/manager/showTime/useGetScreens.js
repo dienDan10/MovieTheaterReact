@@ -1,14 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { getScreens } from "../../../services/apiScreen";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { setFilterScreenId } from "../../../redux/manageShowtimeSlice";
 
-const useGetScreens = () => {
-  return useQuery({
-    queryKey: ["screens"],
-    queryFn: async () => {
-      const res = await customAxios.get("/api/screens");
-      return res.data;
+export default function useGetScreens() {
+  const { theaterId } = useSelector((state) => state.user.user);
+  const filters = useSelector((state) => state.manageShowtime.filters);
+  const dispatch = useDispatch();
+
+  const query = useQuery({
+    queryKey: ["screens", theaterId],
+    queryFn: () => getScreens(theaterId),
+    enabled: !!theaterId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    select: (data) => {
+      return data?.data || [];
     },
   });
-};
 
-export default useGetScreens;
+  // Set the first screen as the default screenId when screens are loaded and no screenId is selected yet
+  useEffect(() => {
+    if (query.data?.length > 0 && !filters.screenId) {
+      const firstScreen = query.data[0];
+      dispatch(setFilterScreenId(firstScreen.id));
+    }
+  }, [query.data, filters.screenId, dispatch]);
+
+  return query;
+}

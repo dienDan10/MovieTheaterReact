@@ -11,17 +11,17 @@ function BookingSteps() {
       <BookingStep
         isActive={step === 1}
         icon={<MdOutlineChair className="text-xl" />}
-        text="Select Seats"
+        text="Chọn ghế"
       />
       <BookingStep
         isActive={step === 2}
         icon={<LuPopcorn className="text-xl" />}
-        text="Concessions"
+        text="Chọn đồ ăn"
       />
       <BookingStep
         isActive={step === 3}
         icon={<FaRegCreditCard className="text-xl" />}
-        text="Payment"
+        text="Thanh toán"
       />
     </div>
   );

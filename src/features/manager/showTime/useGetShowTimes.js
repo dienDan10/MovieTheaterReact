@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { getShowTimes } from "../../../services/apiShowTime";
+import { useSelector } from "react-redux";
 
-const useGetShowTimes = () => {
+export default function useGetShowTimes() {
+  const filters = useSelector((state) => state.manageShowtime.filters);
+
   return useQuery({
-    queryKey: ["showtimes"],
-    queryFn: async () => {
-      const res = await customAxios.get("/api/showtimes");
-      return res.data;
+    queryKey: ["showtimes", filters],
+    queryFn: () => getShowTimes(filters),
+    enabled: !!filters.startDate && !!filters.endDate && !!filters.screenId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    select: (data) => {
+      return data?.data || [];
     },
   });
-};
-
-export default useGetShowTimes;
+}

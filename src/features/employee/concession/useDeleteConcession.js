@@ -1,35 +1,35 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import customAxios from "../../../utils/axios-customize";
+import { deleteConcession } from "../../../services/apiConcession";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
-import { ERROR_NOTIFICATION, SUCCESS_NOTIFICATION } from "../../../utils/constant";
+import {
+  ERROR_NOTIFICATION,
+  SUCCESS_NOTIFICATION,
+} from "../../../utils/constant";
 
-const useCreateShowTime = () => {
+export const useDeleteConcession = () => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: async (data) => {
-      return customAxios.post("/api/showtimes", data);
-    },
+    mutationFn: deleteConcession,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["showtimes"] });
       dispatch(
         notify({
           type: SUCCESS_NOTIFICATION,
-          message: "ShowTime created successfully!",
+          message: "Concession deleted successfully",
         })
       );
+      queryClient.invalidateQueries({ queryKey: ["concessions"] });
     },
     onError: (error) => {
       dispatch(
         notify({
           type: ERROR_NOTIFICATION,
-          message: error.message || "Failed to create showtime",
+          message:
+            error.response?.data?.message || "Failed to delete concession",
         })
       );
     },
   });
 };
-
-export default useCreateShowTime;

@@ -1,14 +1,29 @@
-import { Typography, Tag, Button, Row, Col, Rate, Divider, Modal } from "antd";
+import {
+  Typography,
+  Tag,
+  Button,
+  Row,
+  Col,
+  Rate,
+  Divider,
+  Modal,
+  Spin,
+} from "antd";
 import {
   PlayCircleOutlined,
   ClockCircleOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
+import useGetMovieDetails from "./useGetMovieDetails";
 
 function MovieHero() {
   // State for trailer modal
   const [isTrailerVisible, setIsTrailerVisible] = useState(false);
+
+  // Fetch movie details
+  const { data: movieData, isLoading } = useGetMovieDetails();
+  const movie = movieData?.data;
 
   // Functions to handle trailer modal
   const openTrailer = () => {
@@ -19,27 +34,37 @@ function MovieHero() {
     setIsTrailerVisible(false);
   };
 
-  // Fake movie data
-  const movie = {
-    title: "Inception",
-    genre: ["Sci-Fi", "Action", "Thriller"],
-    director: "Christopher Nolan",
-    cast: "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page, Tom Hardy, Ken Watanabe",
-    description:
-      "Dom Cobb is a skilled thief, the absolute best in the dangerous art of extraction, stealing valuable secrets from deep within the subconscious during the dream state, when the mind is at its most vulnerable.",
-    duration: "148 min",
-    releaseDate: "July 16, 2020",
-    rating: 4.8,
-    posterUrl: "/images/slider1.jpg", // Using a placeholder image from your project
-    trailerUrl: "https://www.youtube.com/watch?v=YoHD9XEInc0",
-  };
+  // Parse the genre string into an array of genres
+  const genreArray = movie?.genre
+    ? movie.genre.split(",").map((g) => g.trim())
+    : [];
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] bg-black">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  // Show placeholder if no movie data
+  if (!movie) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] bg-black text-white">
+        <p>Movie information not available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative bg-black">
       {/* Background Image with Overlay */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-30"
-        style={{ backgroundImage: `url(${movie.posterUrl})` }}
+        style={{
+          backgroundImage: `url(${movie.posterUrl || "/background.jpg"})`,
+        }}
       ></div>
       <div className="absolute inset-0 bg-gradient-to-r from-black via-black/30 to-transparent"></div>
 
@@ -48,7 +73,7 @@ function MovieHero() {
         {/* Movie Poster */}
         <div className="md:w-1/3 w-full flex justify-center">
           <img
-            src={movie.posterUrl}
+            src={movie.posterUrl || "/background.jpg"}
             alt={movie.title}
             className="rounded-2xl shadow-2xl w-full max-w-sm object-cover"
             style={{ maxHeight: "500px" }}
@@ -65,18 +90,18 @@ function MovieHero() {
           <div className="flex items-center mb-4">
             <Rate
               allowHalf
-              defaultValue={movie.rating}
+              defaultValue={4}
               disabled
               className="text-yellow-400"
             />
             <span className="ml-2 text-yellow-400 font-semibold text-base">
-              {movie.rating}/5
+              4/5
             </span>
           </div>
 
           {/* Genres */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {movie.genre.map((genre, index) => (
+            {genreArray.map((genre, index) => (
               <Tag
                 key={index}
                 color="geekblue"
@@ -91,11 +116,13 @@ function MovieHero() {
           <Row gutter={[16, 16]} className="mb-6 text-gray-300">
             <Col span={24} md={12} className="flex items-center">
               <ClockCircleOutlined className="mr-2 text-lg" />
-              <span>Duration: {movie.duration}</span>
+              <span>Duration: {movie.duration} min</span>
             </Col>
             <Col span={24} md={12} className="flex items-center">
               <CalendarOutlined className="mr-2 text-lg" />
-              <span>Release Date: {movie.releaseDate}</span>
+              <span>
+                Release Date: {new Date(movie.releaseDate).toLocaleDateString()}
+              </span>
             </Col>
           </Row>
 
@@ -120,15 +147,17 @@ function MovieHero() {
           </div>
 
           {/* Button */}
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlayCircleOutlined />}
-            className="!bg-red-600 hover:!bg-red-700 border-none !rounded-full px-6"
-            onClick={openTrailer}
-          >
-            Watch Trailer
-          </Button>
+          {movie.trailerUrl && (
+            <Button
+              type="primary"
+              size="large"
+              icon={<PlayCircleOutlined />}
+              className="!bg-red-600 hover:!bg-red-700 border-none !rounded-full px-6"
+              onClick={openTrailer}
+            >
+              Watch Trailer
+            </Button>
+          )}
         </div>
       </div>
 
@@ -140,7 +169,7 @@ function MovieHero() {
         footer={null}
         width={800}
         centered
-        destroyOnHidden={true} // Ensures the modal is destroyed when closed
+        destroyOnClose={true}
       >
         <div className="aspect-w-16 aspect-h-9">
           <iframe
@@ -161,6 +190,7 @@ function MovieHero() {
 
 // Helper function to extract YouTube video ID
 function getYoutubeId(url) {
+  if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;

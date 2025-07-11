@@ -5,7 +5,9 @@ import { HiArrowLongLeft } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 
 function BookingDetails() {
-  const { step, seats } = useSelector((state) => state.booking);
+  const { step, seats, theater, screen, showtime } = useSelector(
+    (state) => state.booking
+  );
   const dispatch = useDispatch();
 
   const handleBackBtnClick = () => {
@@ -19,10 +21,17 @@ function BookingDetails() {
   };
 
   const haveSelectedSeats = seats.filter((seat) => seat.isSelected).length > 0;
+  const dataLoaded = Boolean(theater && screen && showtime);
 
   return (
-    <div className="flex-1 flex flex-col gap-6">
-      <Description />
+    <div className="flex-1 flex flex-col gap-6 lg:mt-14">
+      {dataLoaded ? (
+        <Description />
+      ) : (
+        <div className="p-4 text-[15px] bg-neutral-50 text-neutral-900 rounded-lg shadow-sm border-2 border-neutral-200">
+          Loading booking details...
+        </div>
+      )}
       <TotalPrice />
       {step === 3 && (
         <div className="p-4 text-[15px] bg-neutral-50 text-neutral-900 rounded-lg shadow-sm border-2 border-neutral-200">
