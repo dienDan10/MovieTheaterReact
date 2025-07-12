@@ -10,6 +10,11 @@ const initialState = {
   showtime: null,
   movie: null,
   concessions: [],
+  user: {
+    username: null,
+    email: null,
+    phone: null,
+  },
 };
 
 export const bookingSlice = createSlice({
@@ -65,6 +70,12 @@ export const bookingSlice = createSlice({
         concession.count -= 1;
       }
     },
+    setUserInformation: (state, action) => {
+      const { username, email, phone } = action.payload;
+      state.user.username = username || state.user.username;
+      state.user.email = email || state.user.email;
+      state.user.phone = phone || state.user.phone;
+    },
     increaseStep: (state) => {
       if (state.step < 3) state.step += 1;
     },
@@ -90,6 +101,7 @@ export const {
   setShowtimeData,
   increaseConcessionCount,
   decreaseConcessionCount,
+  setUserInformation,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
