@@ -1,4 +1,4 @@
-import { Descriptions, Spin, Tag } from "antd";
+import { Descriptions, Spin, Tag, Image } from "antd";
 import PropTypes from "prop-types";
 import { useGetMovieById } from "./useGetMovieById";
 
@@ -17,10 +17,12 @@ function MovieDetail({ movieId }) {
           <Descriptions.Item label="Title">{movie.title}</Descriptions.Item>
           <Descriptions.Item label="Poster">
             {movie.posterUrl || movie.poster ? (
-              <img
+              <Image
                 src={movie.posterUrl || movie.poster}
-                alt="Poster"
-                style={{ width: 120 }}
+                alt={movie.title}
+                width={200}
+                fallback="https://placehold.co/200x300?text=No+Image"
+                style={{ borderRadius: "8px" }}
               />
             ) : (
               <span style={{ color: "#bbb", fontStyle: "italic" }}>

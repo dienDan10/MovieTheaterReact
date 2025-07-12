@@ -6,6 +6,9 @@ const initialState = {
   selectedDate: new Date().toISOString().split("T")[0], // Default to today
   // Cache for showtimes data
   showtimesCache: {},
+  // Login modal state
+  isLoginModalOpen: false,
+  selectedShowtimeId: null,
 };
 
 const showtimeSlice = createSlice({
@@ -28,10 +31,23 @@ const showtimeSlice = createSlice({
         timestamp: Date.now(),
       };
     },
+    openLoginModal: (state, action) => {
+      state.isLoginModalOpen = true;
+      state.selectedShowtimeId = action.payload;
+    },
+    closeLoginModal: (state) => {
+      state.isLoginModalOpen = false;
+    },
   },
 });
 
-export const { setMovieId, setProvinceId, setSelectedDate, cacheShowtimes } =
-  showtimeSlice.actions;
+export const {
+  setMovieId,
+  setProvinceId,
+  setSelectedDate,
+  cacheShowtimes,
+  openLoginModal,
+  closeLoginModal,
+} = showtimeSlice.actions;
 
 export default showtimeSlice.reducer;

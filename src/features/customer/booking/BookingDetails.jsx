@@ -3,12 +3,15 @@ import Description from "./Description";
 import TotalPrice from "./TotalPrice";
 import { HiArrowLongLeft } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
+import { notify } from "../../../redux/notificationSlice";
+import { ERROR_NOTIFICATION } from "../../../utils/constant";
 
 function BookingDetails() {
-  const { step, seats, theater, screen, showtime } = useSelector(
-    (state) => state.booking
-  );
+  const { step, seats, theater, screen, showtime, user, concessions } =
+    useSelector((state) => state.booking);
+  const { user: userInfo } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { username, phone, email } = user || {};
 
   const handleBackBtnClick = () => {
     dispatch(decreaseStep());
@@ -17,7 +20,52 @@ function BookingDetails() {
   const handleContinueBtnClick = () => {
     if (step < 3) {
       dispatch(increaseStep());
+      return;
     }
+
+    try {
+      validateUserForm();
+      // create booking data to send to the server
+
+      const bookingData = {
+        userId: userInfo?.id,
+        username,
+        phone,
+        email,
+        seats: seats
+          .filter((seat) => seat.isSelected)
+          .map((seat) => ({
+            id: seat.id,
+          })),
+        theaterId: theater.id,
+        screenId: screen.id,
+        showtimeId: showtime.id,
+        concessions: concessions
+          .filter((concession) => concession.count > 0)
+          .map((concession) => ({
+            concessionId: concession.id,
+            count: concession.count,
+          })),
+      };
+
+      console.log("Booking data to send:", bookingData);
+    } catch (error) {
+      dispatch(
+        notify({
+          type: ERROR_NOTIFICATION,
+          message: error.message,
+        })
+      );
+      return;
+    }
+  };
+
+  const validateUserForm = () => {
+    if (!username?.trim()) throw new Error("Vui lòng nhập họ và tên!");
+    if (!phone?.match(/^[0-9]{10,11}$/))
+      throw new Error("Số điện thoại không hợp lệ!");
+    if (email && !email.match(/^[^@]+@[^@]+\.[^@]+$/))
+      throw new Error("Email không hợp lệ!");
   };
 
   const haveSelectedSeats = seats.filter((seat) => seat.isSelected).length > 0;
@@ -61,7 +109,7 @@ function BookingDetails() {
           onClick={handleContinueBtnClick}
           disabled={!haveSelectedSeats}
         >
-          Continue
+          {step < 3 ? "Tiếp tục" : "Thanh toán"}
         </button>
       </div>
     </div>
