@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../../redux/notificationSlice";
 import { WARNING_NOTIFICATION } from "../../../utils/constant";
+import { openLoginModal } from "../../../redux/showtimeSlice";
 
 function Showtime({ isActive, time, price, id }) {
   const navigate = useNavigate();
@@ -14,13 +15,14 @@ function Showtime({ isActive, time, price, id }) {
       return;
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated && isActive) {
       dispatch(
         notify({
           type: WARNING_NOTIFICATION,
           message: "Please login to book a ticket",
         })
       );
+      dispatch(openLoginModal(id));
       return;
     }
   };

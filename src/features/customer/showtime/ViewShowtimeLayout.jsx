@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setMovieId } from "../../../redux/showtimeSlice";
 import MovieHero from "./MovieHero";
 import ShowtimeList from "./ShowtimeList";
+import ShowtimeLoginModal from "./ShowtimeLoginModal";
 
 function ViewShowtimeLayout() {
   const { movieId } = useParams();
@@ -19,6 +20,7 @@ function ViewShowtimeLayout() {
     <div className="bg-stone-100 pb-20">
       <MovieHero />
       <ShowtimeList />
+      <ShowtimeLoginModal />
     </div>
   );
 }
