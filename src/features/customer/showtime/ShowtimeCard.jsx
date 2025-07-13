@@ -1,7 +1,9 @@
 import { Card } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 import Showtime from "./Showtime";
+import { useSelector } from "react-redux";
 function ShowtimeCard({ theater }) {
+  const { selectedDate } = useSelector((state) => state.showtime);
   if (!theater) return null;
 
   const checkIsShowtimePast = (showtime) => {
@@ -9,7 +11,7 @@ function ShowtimeCard({ theater }) {
     const now = new Date();
 
     // Parse showtime date and time
-    const showtimeDate = new Date(showtime.date);
+    const showtimeDate = new Date(selectedDate);
     const [hours, minutes] = showtime.startTime.split(":").map(Number);
 
     // Set the hours and minutes on the showtime date

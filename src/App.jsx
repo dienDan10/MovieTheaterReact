@@ -53,6 +53,9 @@ const ConfirmEmail = lazy(() => import("./pages/ConfirmEmail"));
 const ConcessionLayout = lazy(() =>
   import("./features/employee/concession/ConcessionLayout")
 );
+const BookingResultLayout = lazy(() =>
+  import("./features/customer/booking/booking-status/BookingResultLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -101,6 +104,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <BookingLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "booking/result",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <BookingResultLayout />
           </Suspense>
         ),
       },

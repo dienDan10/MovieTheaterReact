@@ -5,12 +5,15 @@ import { HiArrowLongLeft } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import { ERROR_NOTIFICATION } from "../../../utils/constant";
+import { useCreateBooking } from "./useCreateBooking";
+import { SpinnerSmall } from "../../../components/Spinner";
 
 function BookingDetails() {
   const { step, seats, theater, screen, showtime, user, concessions } =
     useSelector((state) => state.booking);
   const { user: userInfo } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { mutate: createBooking, isPending } = useCreateBooking();
   const { username, phone, email } = user || {};
 
   const handleBackBtnClick = () => {
@@ -36,6 +39,7 @@ function BookingDetails() {
           .filter((seat) => seat.isSelected)
           .map((seat) => ({
             id: seat.id,
+            name: seat.seatRow + seat.seatNumber + "",
           })),
         theaterId: theater.id,
         screenId: screen.id,
@@ -43,12 +47,12 @@ function BookingDetails() {
         concessions: concessions
           .filter((concession) => concession.count > 0)
           .map((concession) => ({
-            concessionId: concession.id,
-            count: concession.count,
+            id: concession.id,
+            quantity: concession.count,
           })),
       };
 
-      console.log("Booking data to send:", bookingData);
+      createBooking(bookingData);
     } catch (error) {
       dispatch(
         notify({
@@ -109,7 +113,7 @@ function BookingDetails() {
           onClick={handleContinueBtnClick}
           disabled={!haveSelectedSeats}
         >
-          {step < 3 ? "Tiếp tục" : "Thanh toán"}
+          {isPending ? <SpinnerSmall /> : step < 3 ? "Tiếp tục" : "Thanh toán"}
         </button>
       </div>
     </div>
