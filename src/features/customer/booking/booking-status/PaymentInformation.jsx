@@ -221,15 +221,22 @@ function PaymentInformation() {
             </div>
             <div className="mt-4">
               <div className="bg-gray-100 h-30 flex items-center justify-center rounded mb-2">
+                {/* Create QR code with the format CineMax_Ticket_{payment.Id}_{yyyyMMddHHmmss} using payment date */}
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?data=${
-                    "TICKET-" + payment.id
+                    "CineMax_Ticket_" +
+                    payment.id +
+                    "_" +
+                    dayjs(payment.paymentDate).format("YYYYMMDDHHmmss")
                   }&size=150x150`}
                   alt="Barcode"
                   className="h-24"
                 />
               </div>
-              <p className="text-xs text-gray-500">TICKET-#{payment.id}</p>
+              <p className="text-xs text-gray-500">
+                CineMax_Ticket_{payment.id}_
+                {dayjs(payment.paymentDate).format("YYYYMMDDHHmmss")}
+              </p>
               <button
                 className="inline-block mt-4 px-4 py-2 border border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:cursor-pointer rounded transition"
                 onClick={() => window.print()}
