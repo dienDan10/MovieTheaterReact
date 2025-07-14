@@ -10,10 +10,15 @@ export const createBooking = async (bookingData) => {
   return response.data;
 };
 
-export const verifyPayment = async ({ paymentId, vnpayParams }) => {
+export const verifyPayment = async ({ paymentId, vnpParams }) => {
   const response = await axios.post("/api/bookings/vnpay/verify", {
     paymentId,
-    vnpayParams,
+    vnpParams,
   });
+  return response.data;
+};
+
+export const getBookingDetails = async (paymentId) => {
+  const response = await axios.get(`/api/bookings/payment/${paymentId}`);
   return response.data;
 };

@@ -1,13 +1,30 @@
 import { useMutation } from "@tanstack/react-query";
 import { verifyPayment } from "../../../../services/apiBooking";
+import { useDispatch } from "react-redux";
+import { notify } from "../../../../redux/notificationSlice";
+import { SUCCESS_NOTIFICATION } from "../../../../utils/constant";
 
 export function useVerifyPayment() {
+  const dispatch = useDispatch();
+  const query = new URLSearchParams(window.location.search);
+  const paymentId = query.get("paymentId");
+  const vnpParams = {};
+
+  query.forEach((value, key) => {
+    if (key.startsWith("vnp_")) {
+      vnpParams[key] = value;
+    }
+  });
+
   return useMutation({
-    mutationFn: async ({ paymentId, vnpayParams }) =>
-      verifyPayment({ paymentId, vnpayParams }),
+    mutationFn: async () => verifyPayment({ paymentId, vnpParams }),
     onSuccess: (data) => {
-      // Handle successful payment verification
-      console.log("Payment verified successfully:", data);
+      dispatch(
+        notify({
+          type: SUCCESS_NOTIFICATION,
+          message: "Payment verified successfully!",
+        })
+      );
       return data;
     },
     onError: (error) => {
