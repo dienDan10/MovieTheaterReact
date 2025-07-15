@@ -76,16 +76,24 @@ function LoginForm() {
             )}
           </Form>
 
-          <div className="mt-2 mb-2">
-            <p className="mt-2 text-center">
-              <span>Newcomer? </span>
-              <span
-                className="text-main-900 font-bold hover:underline cursor-pointer"
-                onClick={() => navigate("/register")}
+          <div className="mt-2 mb-2 px-5">
+            <div className="w-full flex flex-col md:flex-row justify-between items-center">
+              <p className="mt-2 text-center">
+                <span>Newcomer? </span>
+                <span
+                  className="text-neutral-900 font-bold hover:underline hover:text-red-600 cursor-pointer"
+                  onClick={() => navigate("/register")}
+                >
+                  Sign up here!
+                </span>
+              </p>
+              <p
+                className="text-center text-sm text-gray-800 hover:underline cursor-pointer"
+                onClick={() => navigate("/forgot-password")}
               >
-                Sign up here!
-              </span>
-            </p>
+                Forgot your password?
+              </p>
+            </div>
             <p className="text-sm text-center mt-2 hover:underline">
               <a href="/">Back to home</a>
             </p>

@@ -27,3 +27,21 @@ export const confirmEmail = async ({ userId, token }) => {
 
   return res;
 };
+
+export const forgotPassword = async ({ email }) => {
+  const res = await axios.post("/api/auth/forgot-password", {
+    email,
+  });
+
+  return res;
+};
+
+export const resetPassword = async ({ userId, resetToken, password }) => {
+  const res = await axios.post("/api/auth/reset-password", {
+    userId,
+    resetToken,
+    password,
+  });
+
+  return res;
+};
