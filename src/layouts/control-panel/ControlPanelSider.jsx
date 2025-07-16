@@ -4,12 +4,13 @@ import {
   MdAccountCircle,
   MdChair,
   MdFastfood,
+  MdOutlinePlaylistAddCheckCircle,
   MdSpaceDashboard,
 } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../../utils/constant";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaLocationDot, FaTicket } from "react-icons/fa6";
 import { RiMovie2AiFill } from "react-icons/ri";
 import { GiTheater } from "react-icons/gi";
 
@@ -34,6 +35,8 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("movies")) return "9";
     if (pathname.includes("showtimes")) return "10";
     if (pathname.includes("concessions")) return "11";
+    if (pathname.includes("checkin")) return "12";
+    if (pathname.includes("booking")) return "13";
   };
 
   const selectedKey = calcSelectedKey();
@@ -111,6 +114,16 @@ function ControlPanelSider({ collapsed }) {
             key: "11",
             icon: <MdFastfood />,
             label: <Link to="concessions">Concessions</Link>,
+          },
+          isEmployee && {
+            key: "12",
+            icon: <MdOutlinePlaylistAddCheckCircle />,
+            label: <Link to="checkin">Checkin</Link>,
+          },
+          isEmployee && {
+            key: "13",
+            icon: <FaTicket />,
+            label: <Link to="booking">Book Ticket</Link>,
           },
         ]}
       />
