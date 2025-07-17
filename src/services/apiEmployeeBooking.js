@@ -5,7 +5,7 @@ export const getShowtimes = async ({ theaterId, date }) => {
   if (theaterId) params.append("theaterId", theaterId);
   if (date) params.append("date", date);
   const response = await axios.get(
-    `/api/employee/booking/showtimes?${params.toString()}`
+    `/api/employee/bookings/showtimes?${params.toString()}`
   );
   return response.data;
 };
