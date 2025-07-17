@@ -1,5 +1,8 @@
 import { useDispatch } from "react-redux";
-import { setSelectedShowtime } from "../../../../redux/employeeBookingSlice";
+import {
+  setActivity,
+  setSelectedShowtime,
+} from "../../../../redux/employeeBookingSlice";
 
 function ShowtimeItem({ showtime }) {
   const dispatch = useDispatch();
@@ -10,6 +13,7 @@ function ShowtimeItem({ showtime }) {
   };
 
   const handleClick = () => {
+    dispatch(setActivity("booking"));
     dispatch(setSelectedShowtime(showtime));
   };
 
