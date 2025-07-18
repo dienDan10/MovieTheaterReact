@@ -7,7 +7,7 @@ export function useGetShowtimeDetail() {
   const { showtimeId } = useParams();
 
   // get showtime details from API
-  const { data, isPending, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["showtimeDetail", showtimeId],
     queryFn: () => getShowtimeDetails(showtimeId),
     enabled: !!showtimeId,
@@ -15,7 +15,7 @@ export function useGetShowtimeDetail() {
 
   return {
     showtimeDetail: data?.data,
-    isPending,
+    isLoading,
     error,
   };
 }

@@ -9,3 +9,8 @@ export const getShowtimes = async ({ theaterId, date }) => {
   );
   return response.data;
 };
+
+export const createBooking = async (bookingData) => {
+  const response = await axios.post("/api/employee/bookings", bookingData);
+  return response.data;
+};

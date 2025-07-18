@@ -6,7 +6,7 @@ export function useGetShowtimeDetail() {
   const { selectedShowtime } = useSelector((state) => state.employeeBooking);
 
   // get showtime details from API
-  const { data, isPending, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["showtimeDetail", selectedShowtime?.id],
     queryFn: () => getShowtimeDetails(selectedShowtime?.id),
     enabled: !!selectedShowtime?.id, // Only fetch if selectedShowtime is available
@@ -14,7 +14,7 @@ export function useGetShowtimeDetail() {
 
   return {
     showtimeDetail: data?.data,
-    isPending,
+    isLoading,
     error,
   };
 }

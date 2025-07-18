@@ -14,7 +14,7 @@ const { Title } = Typography;
 function BookingLayout() {
   const {
     showtimeDetail,
-    isPending: isLoadingShowtimeDetail,
+    isLoading: isLoadingShowtimeDetail,
     error: errorShowtimeDetail,
   } = useGetShowtimeDetail();
   const { step } = useSelector((state) => state.booking);

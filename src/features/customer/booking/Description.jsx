@@ -19,6 +19,7 @@ function Description() {
         Suất{" "}
         <span className="font-semibold">
           {showtime?.startTime?.slice(0, 5)}
+          {" - "}
           {showtime?.date && format(new Date(showtime.date), "dd/MM/yyyy")}
         </span>
       </p>

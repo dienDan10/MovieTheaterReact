@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button, Result } from "antd";
@@ -21,7 +21,7 @@ function BookingResultLayout() {
   const { verificationStatus } = useSelector((state) => state.bookingConfirm);
 
   // Get verification mutation
-  const { mutate: verifyPayment, isLoading: isVerifying } = useVerifyPayment();
+  const { mutate: verifyPayment, isPending: isVerifying } = useVerifyPayment();
 
   const navigate = useNavigate();
 

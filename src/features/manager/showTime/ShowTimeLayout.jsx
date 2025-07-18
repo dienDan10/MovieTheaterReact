@@ -10,13 +10,13 @@ import { groupBy } from "lodash";
 const { Title } = Typography;
 
 function ShowTimeLayout() {
-  const { data: showtimes = [], isPending, isError } = useGetShowTimes();
+  const { data: showtimes = [], isLoading, isError } = useGetShowTimes();
 
   // Group showtimes by date
   const groupedShowtimes = groupBy(showtimes, "date");
 
   // Render loading state
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <Spin size="large" />

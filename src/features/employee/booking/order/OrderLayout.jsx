@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
-import BookingDetails from "../../../customer/booking/BookingDetails";
 import BookingSteps from "../../../customer/booking/BookingSteps";
 import PaymentLayout from "../../../customer/booking/payment/PaymentLayout";
 import SelectConcessionLayout from "../../../customer/booking/select-concessions/SelectConcessionLayout";
 import SelectSeatsLayout from "../../../customer/booking/select-seats/SelectSeatsLayout";
+import BookingDetails from "./BookingDetails";
 
 function OrderLayout() {
   const { step } = useSelector((state) => state.booking);
