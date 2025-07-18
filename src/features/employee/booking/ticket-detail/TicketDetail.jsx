@@ -1,6 +1,5 @@
-import React from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -14,14 +13,11 @@ import {
   CoffeeOutlined,
   BarcodeOutlined,
 } from "@ant-design/icons";
-import { Button } from "antd";
-import dayjs from "dayjs";
 import { GiFilmSpool } from "react-icons/gi";
 import { IoReceiptOutline } from "react-icons/io5";
 
-function PaymentInformation() {
-  const { paymentDetails } = useSelector((state) => state.bookingConfirm);
-  const navigate = useNavigate();
+function TicketDetail() {
+  const { paymentDetails } = useSelector((state) => state.employeeBooking);
 
   if (!paymentDetails) return null;
 
@@ -262,17 +258,10 @@ function PaymentInformation() {
               </p>
             </div>
           </div>
-
-          <button
-            className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition hover:cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            Back to Home
-          </button>
         </div>
       </div>
     </div>
   );
 }
 
-export default PaymentInformation;
+export default TicketDetail;

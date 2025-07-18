@@ -2,6 +2,7 @@ import { Form, Input } from "antd";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserInformation } from "../../../../redux/bookingSlice";
+import { ROLE_CUSTOMER } from "../../../../utils/constant";
 
 function UserInformation() {
   const [form] = Form.useForm();
@@ -9,18 +10,20 @@ function UserInformation() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    form.setFieldsValue({
-      username: user?.name || "",
-      email: user?.email || "",
-    });
-
-    dispatch(
-      setUserInformation({
+    if (user.role === ROLE_CUSTOMER) {
+      form.setFieldsValue({
         username: user?.name || "",
         email: user?.email || "",
-        phone: user?.phone || "",
-      })
-    );
+      });
+
+      dispatch(
+        setUserInformation({
+          username: user?.name || "",
+          email: user?.email || "",
+          phone: user?.phone || "",
+        })
+      );
+    }
   }, [form, user, dispatch]);
 
   const handleValuesChange = (changedValues, allValues) => {

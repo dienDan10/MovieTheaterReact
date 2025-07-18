@@ -1,7 +1,8 @@
-import { MdChair, MdOutlineChair } from "react-icons/md";
+import { useSelector } from "react-redux";
+import { ROLE_EMPLOYEE } from "../utils/constant";
 
-// eslint-disable-next-line react/prop-types
 function BookingStep({ isActive = true, icon, text }) {
+  const { user } = useSelector((state) => state.user);
   return (
     <div
       style={{
@@ -10,7 +11,9 @@ function BookingStep({ isActive = true, icon, text }) {
       }}
       className={` flex flex-col flex-1 items-center justify-center w-40 h-[50px] border-[2px] border-red-700  ${
         isActive ? "bg-red-700 text-neutral-50" : "bg-neutral-50 text-red-700"
-      } transition-all duration-200`}
+      } transition-all duration-200 ${
+        user.role === ROLE_EMPLOYEE && "bg-neutral-200 border-0!"
+      }`}
     >
       {/* <MdOutlineChair className="text-xl" /> */}
       {icon && icon}

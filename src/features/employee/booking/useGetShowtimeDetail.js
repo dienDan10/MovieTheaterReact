@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
 import { getShowtimeDetails } from "../../../services/apiBooking";
+import { useSelector } from "react-redux";
 
 export function useGetShowtimeDetail() {
-  // get showtime id from URL params
-  const { showtimeId } = useParams();
+  const { selectedShowtime } = useSelector((state) => state.employeeBooking);
 
   // get showtime details from API
   const { data, isLoading, error } = useQuery({
-    queryKey: ["showtimeDetail", showtimeId],
-    queryFn: () => getShowtimeDetails(showtimeId),
-    enabled: !!showtimeId,
+    queryKey: ["showtimeDetail", selectedShowtime?.id],
+    queryFn: () => getShowtimeDetails(selectedShowtime?.id),
+    enabled: !!selectedShowtime?.id, // Only fetch if selectedShowtime is available
   });
 
   return {
