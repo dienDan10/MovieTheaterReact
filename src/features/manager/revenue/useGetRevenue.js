@@ -10,6 +10,7 @@ export function useGetRevenue() {
     queryKey: ["revenue", filters],
     queryFn: () => getRevenue(filters),
     enabled: !!startDate && !!endDate && !!theaterId,
+    refetchOnWindowFocus: false,
   });
 
   return {

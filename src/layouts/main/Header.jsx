@@ -54,7 +54,7 @@ function Header() {
             id="nav-content"
           >
             <ul className="list-reset lg:flex justify-center flex-1 items-center mb-0">
-              <li className="mr-3">
+              {/* <li className="mr-3">
                 <Link
                   to="/"
                   className="decoration-none text-slate-100 uppercase font-semibold px-2.5 py-1.5 hover:bg-red-500 rounded-md transition-all"
@@ -69,7 +69,7 @@ function Header() {
                 >
                   Booking
                 </Link>
-              </li>
+              </li> */}
             </ul>
             {/* User menu or login/register buttons */}
           </div>
