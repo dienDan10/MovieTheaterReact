@@ -24,7 +24,7 @@ function ControlPanelSider({ collapsed }) {
   const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
 
   const calcSelectedKey = () => {
-    if (pathname.includes("dashboard")) return "1";
+    if (pathname.includes("revenue")) return "1";
     if (pathname.includes("managers")) return "managers";
     if (pathname.includes("employees")) return "employees";
     if (pathname.includes("customers")) return "customers";
@@ -59,7 +59,7 @@ function ControlPanelSider({ collapsed }) {
           isManager && {
             key: "1",
             icon: <MdSpaceDashboard />,
-            label: <Link to="dashboard">Dashboard</Link>,
+            label: <Link to="revenue">Revenue</Link>,
           },
           isAdmin && {
             key: "2",

@@ -39,9 +39,6 @@ const ShowTimeLayout = lazy(() =>
   import("./features/manager/showTime/ShowTimeLayout")
 );
 const ScreenLayout = lazy(() => import("./features/admin/screen/ScreenLayout"));
-const DashboardLayout = lazy(() =>
-  import("./features/manager/dashboard/DashboardLayout")
-);
 const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
 const BookingLayout = lazy(() =>
   import("./features/customer/booking/BookingLayout")
@@ -63,6 +60,9 @@ const CheckinLayout = lazy(() =>
 );
 const EmployeeBookingLayout = lazy(() =>
   import("./features/employee/booking/EmployeeBookingLayout")
+);
+const RevenueLayout = lazy(() =>
+  import("./features/manager/revenue/RevenueLayout")
 );
 
 const router = createBrowserRouter([
@@ -231,10 +231,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "dashboard",
+        path: "revenue",
         element: (
           <Suspense fallback={<SpinnerLarge />}>
-            <DashboardLayout />
+            <RevenueLayout />
           </Suspense>
         ),
       },
