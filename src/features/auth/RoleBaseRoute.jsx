@@ -14,7 +14,7 @@ function RoleBaseRoute({ children }) {
     if (user?.role === ROLE_ADMIN) {
       navigate("theaters", { replace: false });
     } else if (user?.role === ROLE_MANAGER) {
-      navigate("dashboard", { replace: false });
+      navigate("revenue", { replace: false });
     } else if (user?.role === ROLE_EMPLOYEE) {
       navigate("concessions", { replace: false });
     }
