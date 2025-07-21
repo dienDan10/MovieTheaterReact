@@ -45,3 +45,12 @@ export const resetPassword = async ({ userId, resetToken, password }) => {
 
   return res;
 };
+
+export const changePassword = async ({ oldPassword, newPassword }) => {
+  const res = await axios.post("/api/auth/change-password", {
+    oldPassword,
+    newPassword,
+  });
+
+  return res;
+};

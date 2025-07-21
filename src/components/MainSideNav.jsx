@@ -60,15 +60,15 @@ function MainSideNav({ isOpen, setIsOpen }) {
       </div>
       <hr />
       <ul className="list-reset justify-center flex-1 items-center mt-2">
-        {/* <li className="mr-3">
+        <li className="mr-3">
           <NavLink
             to="/"
             className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
           >
-            Home
+            Trang chủ
           </NavLink>
         </li>
-        <li className="mr-3">
+        {/* <li className="mr-3">
           <NavLink
             className="block py-2 px-4 text-slate-100! uppercase hover:underline! transition-all!"
             to="news"

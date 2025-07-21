@@ -6,12 +6,15 @@ import { Avatar, Dropdown } from "antd";
 import { FaUser } from "react-icons/fa6";
 import { doLogoutAction } from "../redux/userSlice";
 import { useEffect, useState } from "react";
+import ChangePasswordModel from "../features/auth/ChangePasswordModel";
 
 function UserMenu() {
   const { user } = useSelector((state) => state.user);
   const location = useLocation();
   const { pathname } = location;
   const dispatch = useDispatch();
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
 
   const onSignOutClick = () => {
     // First remove the token
@@ -50,6 +53,14 @@ function UserMenu() {
       },
     {
       label: (
+        <span onClick={() => setIsChangePasswordModalOpen(true)}>
+          Change password
+        </span>
+      ),
+      key: "2",
+    },
+    {
+      label: (
         <span
           onClick={onSignOutClick}
           className="flex gap-2 justify-start items-center w-full "
@@ -80,22 +91,28 @@ function UserMenu() {
   }, []);
 
   return (
-    <Dropdown
-      menu={{
-        items,
-      }}
-      trigger={["click"]}
-    >
-      <Avatar
-        icon={<FaUser />}
-        size={avatarSize}
-        style={{
-          backgroundColor: "#ffffff",
-          color: "#1c375b",
-          cursor: "pointer",
+    <>
+      <Dropdown
+        menu={{
+          items,
         }}
+        trigger={["click"]}
+      >
+        <Avatar
+          icon={<FaUser />}
+          size={avatarSize}
+          style={{
+            backgroundColor: "#ffffff",
+            color: "#1c375b",
+            cursor: "pointer",
+          }}
+        />
+      </Dropdown>
+      <ChangePasswordModel
+        isModalOpen={isChangePasswordModalOpen}
+        setIsModalOpen={setIsChangePasswordModalOpen}
       />
-    </Dropdown>
+    </>
   );
 }
 
