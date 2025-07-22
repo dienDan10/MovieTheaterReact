@@ -14,3 +14,10 @@ export const createBooking = async (bookingData) => {
   const response = await axios.post("/api/employee/bookings", bookingData);
   return response.data;
 };
+
+export const checkinTicket = async (paymentId) => {
+  const response = await axios.post(`/api/employee/bookings/checkin`, {
+    paymentId,
+  });
+  return response.data;
+};
