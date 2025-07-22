@@ -10,12 +10,14 @@ import {
   ERROR_NOTIFICATION,
   SUCCESS_NOTIFICATION,
 } from "../../../utils/constant";
+import QrScanner from "./QrScanner";
 
 function CheckinLayout() {
   const [paymentId, setPaymentId] = useState(null);
   const [checkinStatus, setCheckinStatus] = useState("Not Checked In");
   const [showTicketDetail, setShowTicketDetail] = useState(false);
   const [errorType, setErrorType] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
   const dispatch = useDispatch();
   // Get booking details using the hook from customer module
   const {
@@ -29,16 +31,32 @@ function CheckinLayout() {
     useCheckinTicket();
 
   // Handle check-in process
-  const handleCheckin = (extractedPaymentId) => {
+  const handleCheckin = (input) => {
+    // Nếu input là mã vé CineMax_Ticket_{paymentId}_{datetime}, tách paymentId
+    let paymentId = input;
+    if (typeof input === "string" && input.startsWith("CineMax_Ticket_")) {
+      const parts = input.split("_");
+      if (parts.length >= 3 && !isNaN(parts[2])) {
+        paymentId = parts[2];
+      } else {
+        dispatch(
+          notify({
+            type: ERROR_NOTIFICATION,
+            message: "Invalid ticket ID format from QR code",
+          })
+        );
+        return;
+      }
+    }
     // Reset error states
     setErrorType(null);
-    setPaymentId(extractedPaymentId);
-
-    // Call the check-in API
-    checkinTicket(extractedPaymentId, {
+    setPaymentId(paymentId);
+    setShowTicketDetail(true); // Luôn show ticket detail khi scan/checkin
+    // Đảm bảo camera luôn mở sau mỗi lần scan
+    setShowScanner(true);
+    checkinTicket(paymentId, {
       onSuccess: () => {
         setCheckinStatus("Checked In");
-        setShowTicketDetail(true);
         dispatch(
           notify({
             type: SUCCESS_NOTIFICATION,
@@ -47,15 +65,12 @@ function CheckinLayout() {
         );
       },
       onError: (error) => {
-        setShowTicketDetail(true); // Still show the ticket details
-
-        // Handle specific error codes
+        setShowTicketDetail(true); // Luôn show ticket detail khi có lỗi
+        setShowScanner(true); // Đảm bảo camera luôn mở kể cả khi lỗi
         if (error.response) {
           const { status } = error.response;
           console.log("Check-in error response:", error.response);
-
           if (status === 404) {
-            // Ticket does not exist
             setErrorType("NOT_FOUND");
             dispatch(
               notify({
@@ -64,17 +79,16 @@ function CheckinLayout() {
               })
             );
           } else if (status === 400) {
-            // Ticket already checked in
             setErrorType("ALREADY_CHECKED_IN");
-
             dispatch(
               notify({
                 type: ERROR_NOTIFICATION,
-                message: "This ticket has already been checked in.",
+                message:
+                  error?.response?.data?.title ||
+                  "This ticket has already been checked in.",
               })
             );
           } else {
-            // Generic error
             setErrorType("GENERAL_ERROR");
             dispatch(
               notify({
@@ -84,7 +98,6 @@ function CheckinLayout() {
             );
           }
         } else {
-          // Network error or unexpected error structure
           setErrorType("GENERAL_ERROR");
           dispatch(
             notify({
@@ -109,43 +122,69 @@ function CheckinLayout() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {!showTicketDetail ? (
-        <SearchTicketForm onCheckin={handleCheckin} />
-      ) : (
-        <div>
-          <button
-            onClick={() => {
-              setShowTicketDetail(false);
-              setPaymentId(null);
-              setCheckinStatus("Not Checked In");
-              setErrorType(null);
-            }}
-            className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
-          >
-            ← Back to Search
-          </button>
-
-          {/* Show error alert for NOT_FOUND error instead of ticket details */}
-          {errorType === "NOT_FOUND" ? (
-            <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
-              <Alert
-                message="Ticket Not Found"
-                description="This ticket ID does not exist in our system. Please verify the ticket ID and try again."
-                type="error"
-                showIcon
-                className="mb-4"
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Left: Check-in actions */}
+        <div className="md:w-1/2 w-full space-y-6">
+          <h2 className="text-xl font-bold mb-2">Check-in Ticket</h2>
+          <SearchTicketForm onCheckin={handleCheckin} />
+          <div>
+            {!showScanner ? (
+              <button
+                onClick={() => setShowScanner(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition w-full"
+              >
+                Scan QR Code
+              </button>
+            ) : (
+              <QrScanner
+                onScan={handleCheckin}
+                onClose={() => setShowScanner(false)}
               />
-            </div>
+            )}
+          </div>
+        </div>
+        {/* Right: Ticket detail */}
+        <div className="md:w-1/2 w-full">
+          {showTicketDetail ? (
+            <>
+              <button
+                onClick={() => {
+                  setShowTicketDetail(false);
+                  setPaymentId(null);
+                  setCheckinStatus("Not Checked In");
+                  setErrorType(null);
+                }}
+                className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition w-full"
+              >
+                Clear Ticket Info
+              </button>
+              {/* Show error alert for NOT_FOUND error instead of ticket details */}
+              {errorType === "NOT_FOUND" ? (
+                <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+                  <Alert
+                    message="Ticket Not Found"
+                    description="This ticket ID does not exist in our system. Please verify the ticket ID and try again."
+                    type="error"
+                    showIcon
+                    className="mb-4"
+                  />
+                </div>
+              ) : (
+                <TicketDetail
+                  bookingData={bookingData?.data}
+                  isLoading={isLoadingBooking || isCheckinLoading}
+                  checkinStatus={checkinStatus}
+                  errorType={errorType}
+                />
+              )}
+            </>
           ) : (
-            <TicketDetail
-              bookingData={bookingData?.data}
-              isLoading={isLoadingBooking || isCheckinLoading}
-              checkinStatus={checkinStatus}
-              errorType={errorType}
-            />
+            <div className="text-gray-400 text-center mt-16">
+              No ticket information available. Please check in to see ticket details.
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
