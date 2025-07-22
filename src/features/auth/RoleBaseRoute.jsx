@@ -12,7 +12,7 @@ function RoleBaseRoute({ children }) {
     if (!isAuthenticated) return;
 
     if (user?.role === ROLE_ADMIN) {
-      navigate("theaters", { replace: false });
+      navigate("revenue", { replace: false });
     } else if (user?.role === ROLE_MANAGER) {
       navigate("revenue", { replace: false });
     } else if (user?.role === ROLE_EMPLOYEE) {

@@ -1,12 +1,30 @@
 import PropTypes from "prop-types";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectSeat } from "../../../../redux/bookingSlice";
+import { notify } from "../../../../redux/notificationSlice";
+import {
+  ERROR_NOTIFICATION,
+  MAX_SEAT_SELECTION,
+} from "../../../../utils/constant";
 
 function SeatItem({ seat }) {
   const dispatch = useDispatch();
+  const { seats } = useSelector((state) => state.booking);
 
   const handleSeatClick = () => {
     if (seat.isBooked) return;
+    // caclulate total of selected seats
+    const selectedSeats = seats.filter((s) => s.isSelected);
+    const totalSelected = selectedSeats.length;
+    if (totalSelected >= MAX_SEAT_SELECTION && !seat.isSelected) {
+      dispatch(
+        notify({
+          type: ERROR_NOTIFICATION,
+          message: `You can only select up to ${MAX_SEAT_SELECTION} seats.`,
+        })
+      );
+      return;
+    }
     dispatch(selectSeat(seat.id));
   };
 

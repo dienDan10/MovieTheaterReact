@@ -56,7 +56,7 @@ function ControlPanelSider({ collapsed }) {
         mode="inline"
         selectedKeys={[selectedKey]}
         items={[
-          isManager && {
+          (isAdmin || isManager) && {
             key: "1",
             icon: <MdSpaceDashboard />,
             label: <Link to="revenue">Revenue</Link>,

@@ -2,11 +2,13 @@ import { Spin, Typography } from "antd";
 import RevenueFilter from "./RevenueFilter";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { ROLE_MANAGER } from "../../../utils/constant";
+import { ROLE_ADMIN, ROLE_MANAGER } from "../../../utils/constant";
 import { setFilterTheaterId } from "../../../redux/revenueSlice";
 import { useGetRevenue } from "./useGetRevenue";
 import RevenueChart from "./RevenueChart";
 import RevenueByMovie from "./RevenueByMovie";
+import RevenueByConcession from "./RevenueByConcession";
+import RevenueByTheater from "./RevenueByTheater";
 
 const { Title } = Typography;
 
@@ -45,7 +47,11 @@ function RevenueLayout() {
       ) : (
         <>
           <RevenueChart revenue={revenue} />
-          <RevenueByMovie revenue={revenue} />
+          <div className="flex flex-col xl:flex-row xl:gap-4 xl:mt-5">
+            <RevenueByMovie revenue={revenue} />
+            {user.role === ROLE_ADMIN && <RevenueByTheater revenue={revenue} />}
+          </div>
+          <RevenueByConcession revenue={revenue} />
         </>
       )}
     </div>

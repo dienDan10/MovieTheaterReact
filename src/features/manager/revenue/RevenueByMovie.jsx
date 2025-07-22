@@ -4,26 +4,25 @@ import RevenueByMovieModal from "./RevenueByMovieModal";
 
 function RevenueByMovie({ revenue }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const movieStatsMap = {};
+  const movieStats = {};
 
-  revenue.forEach((item) => {
-    const { id: movieId, title } = item.movie;
-    const { ticketCount, amount } = item.payment;
+  revenue.forEach(({ movie }) => {
+    const { id, title, ticketCount, amount } = movie;
 
-    if (!movieStatsMap[movieId]) {
-      movieStatsMap[movieId] = {
-        movieId,
+    if (!movieStats[id]) {
+      movieStats[id] = {
+        movieId: id,
         title: title.trim(),
         ticketCount: 0,
         revenue: 0,
       };
     }
 
-    movieStatsMap[movieId].ticketCount += ticketCount;
-    movieStatsMap[movieId].revenue += amount;
+    movieStats[id].ticketCount += ticketCount;
+    movieStats[id].revenue += amount;
   });
 
-  const result = Object.values(movieStatsMap).sort(
+  const result = Object.values(movieStats).sort(
     (a, b) => b.revenue - a.revenue
   );
 
@@ -36,7 +35,7 @@ function RevenueByMovie({ revenue }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-md shadow-md mb-6 mt-6">
+    <div className="flex-4 bg-white p-4 rounded-md shadow-md mb-6 mt-6">
       <div className="flex justify-between items-center border-b border-neutral-200">
         <h2 className="text-lg font-semibold mb-4">Doanh thu theo phim</h2>
         <p
