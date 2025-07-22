@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Alert } from "antd";
 import SearchTicketForm from "./SearchTicketForm";
 import TicketDetail from "./TicketDetail";
@@ -19,6 +19,7 @@ function CheckinLayout() {
   const [errorType, setErrorType] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
   const dispatch = useDispatch();
+
   // Get booking details using the hook from customer module
   const {
     data: bookingData,
@@ -30,85 +31,93 @@ function CheckinLayout() {
   const { mutate: checkinTicket, isLoading: isCheckinLoading } =
     useCheckinTicket();
 
+  // Toggle scanner visibility
+  const toggleScanner = useCallback(() => {
+    setShowScanner((prevState) => !prevState);
+  }, []);
+
   // Handle check-in process
-  const handleCheckin = (input) => {
-    // Nếu input là mã vé CineMax_Ticket_{paymentId}_{datetime}, tách paymentId
-    let paymentId = input;
-    if (typeof input === "string" && input.startsWith("CineMax_Ticket_")) {
-      const parts = input.split("_");
-      if (parts.length >= 3 && !isNaN(parts[2])) {
-        paymentId = parts[2];
-      } else {
-        dispatch(
-          notify({
-            type: ERROR_NOTIFICATION,
-            message: "Invalid ticket ID format from QR code",
-          })
-        );
-        return;
+  const handleCheckin = useCallback(
+    (input) => {
+      // Nếu input là mã vé CineMax_Ticket_{paymentId}_{datetime}, tách paymentId
+      let ticketId = input;
+      if (typeof input === "string" && input.startsWith("CineMax_Ticket_")) {
+        const parts = input.split("_");
+        if (parts.length >= 3 && !isNaN(parts[2])) {
+          ticketId = parts[2];
+        } else {
+          dispatch(
+            notify({
+              type: ERROR_NOTIFICATION,
+              message: "Invalid ticket ID format from QR code",
+            })
+          );
+          return;
+        }
       }
-    }
-    // Reset error states
-    setErrorType(null);
-    setPaymentId(paymentId);
-    setShowTicketDetail(true); // Luôn show ticket detail khi scan/checkin
-    // Đảm bảo camera luôn mở sau mỗi lần scan
-    setShowScanner(true);
-    checkinTicket(paymentId, {
-      onSuccess: () => {
-        setCheckinStatus("Checked In");
-        dispatch(
-          notify({
-            type: SUCCESS_NOTIFICATION,
-            message: "Ticket checked in successfully!",
-          })
-        );
-      },
-      onError: (error) => {
-        setShowTicketDetail(true); // Luôn show ticket detail khi có lỗi
-        setShowScanner(true); // Đảm bảo camera luôn mở kể cả khi lỗi
-        if (error.response) {
-          const { status } = error.response;
-          console.log("Check-in error response:", error.response);
-          if (status === 404) {
-            setErrorType("NOT_FOUND");
-            dispatch(
-              notify({
-                type: ERROR_NOTIFICATION,
-                message: "Ticket not found. Please verify the ticket ID.",
-              })
-            );
-          } else if (status === 400) {
-            setErrorType("ALREADY_CHECKED_IN");
-            dispatch(
-              notify({
-                type: ERROR_NOTIFICATION,
-                message:
-                  error?.response?.data?.title ||
-                  "This ticket has already been checked in.",
-              })
-            );
+
+      // Reset error states
+      setErrorType(null);
+      setPaymentId(ticketId);
+      setShowTicketDetail(true);
+
+      // Process the ticket check-in
+      checkinTicket(ticketId, {
+        onSuccess: () => {
+          setCheckinStatus("Checked In");
+          dispatch(
+            notify({
+              type: SUCCESS_NOTIFICATION,
+              message: "Ticket checked in successfully!",
+            })
+          );
+          // Keep scanner open for continuous scanning
+        },
+        onError: (error) => {
+          setShowTicketDetail(true);
+          if (error.response) {
+            const { status } = error.response;
+            if (status === 404) {
+              setErrorType("NOT_FOUND");
+              dispatch(
+                notify({
+                  type: ERROR_NOTIFICATION,
+                  message: "Ticket not found. Please verify the ticket ID.",
+                })
+              );
+            } else if (status === 400) {
+              setErrorType("ALREADY_CHECKED_IN");
+              dispatch(
+                notify({
+                  type: ERROR_NOTIFICATION,
+                  message:
+                    error?.response?.data?.title ||
+                    "This ticket has already been checked in.",
+                })
+              );
+            } else {
+              setErrorType("GENERAL_ERROR");
+              dispatch(
+                notify({
+                  type: ERROR_NOTIFICATION,
+                  message: error?.message || "Failed to check in ticket",
+                })
+              );
+            }
           } else {
             setErrorType("GENERAL_ERROR");
             dispatch(
               notify({
                 type: ERROR_NOTIFICATION,
-                message: error?.message || "Failed to check in ticket",
+                message: "An unexpected error occurred. Please try again.",
               })
             );
           }
-        } else {
-          setErrorType("GENERAL_ERROR");
-          dispatch(
-            notify({
-              type: ERROR_NOTIFICATION,
-              message: "An unexpected error occurred. Please try again.",
-            })
-          );
-        }
-      },
-    });
-  };
+        },
+      });
+    },
+    [checkinTicket, dispatch]
+  );
 
   // Show error if booking data fetch fails
   if (bookingError && showTicketDetail) {
@@ -125,21 +134,17 @@ function CheckinLayout() {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Left: Check-in actions */}
         <div className="md:w-1/2 w-full space-y-6">
-          <h2 className="text-xl font-bold mb-2">Check-in Ticket</h2>
           <SearchTicketForm onCheckin={handleCheckin} />
-          <div>
+          <div className="flex justify-center items-center">
             {!showScanner ? (
               <button
-                onClick={() => setShowScanner(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition w-full"
+                onClick={toggleScanner}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition w-full max-w-md"
               >
                 Scan QR Code
               </button>
             ) : (
-              <QrScanner
-                onScan={handleCheckin}
-                onClose={() => setShowScanner(false)}
-              />
+              <QrScanner onScan={handleCheckin} onClose={toggleScanner} />
             )}
           </div>
         </div>
@@ -180,7 +185,8 @@ function CheckinLayout() {
             </>
           ) : (
             <div className="text-gray-400 text-center mt-16">
-              No ticket information available. Please check in to see ticket details.
+              No ticket information available. Please check in to see ticket
+              details.
             </div>
           )}
         </div>
