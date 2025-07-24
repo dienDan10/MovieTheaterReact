@@ -92,7 +92,7 @@ const AddShowtimeForm = () => {
 
   // Handle add time slot
   const handleAddTimeSlot = (timeToAdd = null) => {
-    const timeToUse = timeToAdd || startTime;
+    const timeToUse = startTime || timeToAdd;
     if (!timeToUse || !selectedMovie) return;
 
     const endTime = calculateEndTime(timeToUse);
@@ -302,6 +302,7 @@ const AddShowtimeForm = () => {
                 type="primary"
                 icon={<PlusOutlined />}
                 className="ml-2"
+                htmlType="button"
                 onClick={handleAddTimeSlot}
                 disabled={!startTime || !selectedMovie}
               >

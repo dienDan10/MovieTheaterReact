@@ -49,8 +49,6 @@ function RevenueByTimeChart({ revenue }) {
     Revenue: revenueByTime[label],
   }));
 
-  console.log("Revenue by time data:", data);
-
   return (
     <div className="w-full h-96 mt-5 mb-10">
       <Title level={4} className="mb-4">
