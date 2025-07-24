@@ -4,7 +4,7 @@ import SearchTicketForm from "./SearchTicketForm";
 import TicketDetail from "./TicketDetail";
 import { useCheckinTicket } from "./useCheckinTicket";
 import { useGetBookingDetail } from "../../customer/booking/booking-status/useGetBookingDetail";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
 import {
   ERROR_NOTIFICATION,
@@ -18,6 +18,7 @@ function CheckinLayout() {
   const [showTicketDetail, setShowTicketDetail] = useState(false);
   const [errorType, setErrorType] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
+  const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   // Get booking details using the hook from customer module
@@ -62,61 +63,64 @@ function CheckinLayout() {
       setShowTicketDetail(true);
 
       // Process the ticket check-in
-      checkinTicket(ticketId, {
-        onSuccess: () => {
-          setCheckinStatus("Checked In");
-          dispatch(
-            notify({
-              type: SUCCESS_NOTIFICATION,
-              message: "Ticket checked in successfully!",
-            })
-          );
-          // Keep scanner open for continuous scanning
-        },
-        onError: (error) => {
-          setShowTicketDetail(true);
-          if (error.response) {
-            const { status } = error.response;
-            if (status === 404) {
-              setErrorType("NOT_FOUND");
-              dispatch(
-                notify({
-                  type: ERROR_NOTIFICATION,
-                  message: "Ticket not found. Please verify the ticket ID.",
-                })
-              );
-            } else if (status === 400) {
-              setErrorType("ALREADY_CHECKED_IN");
-              dispatch(
-                notify({
-                  type: ERROR_NOTIFICATION,
-                  message:
-                    error?.response?.data?.title ||
-                    "This ticket has already been checked in.",
-                })
-              );
+      checkinTicket(
+        { paymentId: ticketId, employeeId: user.id },
+        {
+          onSuccess: () => {
+            setCheckinStatus("Checked In");
+            dispatch(
+              notify({
+                type: SUCCESS_NOTIFICATION,
+                message: "Ticket checked in successfully!",
+              })
+            );
+            // Keep scanner open for continuous scanning
+          },
+          onError: (error) => {
+            setShowTicketDetail(true);
+            if (error.response) {
+              const { status } = error.response;
+              if (status === 404) {
+                setErrorType("NOT_FOUND");
+                dispatch(
+                  notify({
+                    type: ERROR_NOTIFICATION,
+                    message: "Ticket not found. Please verify the ticket ID.",
+                  })
+                );
+              } else if (status === 400) {
+                setErrorType("ALREADY_CHECKED_IN");
+                dispatch(
+                  notify({
+                    type: ERROR_NOTIFICATION,
+                    message:
+                      error?.response?.data?.title ||
+                      "This ticket has already been checked in.",
+                  })
+                );
+              } else {
+                setErrorType("GENERAL_ERROR");
+                dispatch(
+                  notify({
+                    type: ERROR_NOTIFICATION,
+                    message: error?.message || "Failed to check in ticket",
+                  })
+                );
+              }
             } else {
               setErrorType("GENERAL_ERROR");
               dispatch(
                 notify({
                   type: ERROR_NOTIFICATION,
-                  message: error?.message || "Failed to check in ticket",
+                  message: "An unexpected error occurred. Please try again.",
                 })
               );
             }
-          } else {
-            setErrorType("GENERAL_ERROR");
-            dispatch(
-              notify({
-                type: ERROR_NOTIFICATION,
-                message: "An unexpected error occurred. Please try again.",
-              })
-            );
-          }
-        },
-      });
+          },
+        }
+      );
     },
-    [checkinTicket, dispatch]
+    [checkinTicket, dispatch, user.id]
   );
 
   // Show error if booking data fetch fails

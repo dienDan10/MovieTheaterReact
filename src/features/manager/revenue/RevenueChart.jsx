@@ -9,6 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Typography } from "antd";
+const { Title } = Typography;
 
 function RevenueChart({ revenue }) {
   const revenueByDate = revenue.reduce((acc, curr) => {
@@ -34,6 +36,9 @@ function RevenueChart({ revenue }) {
 
   return (
     <div className="w-full h-96 ">
+      <Title level={4} className="mb-4">
+        Doanh thu theo ngày
+      </Title>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           width={500}

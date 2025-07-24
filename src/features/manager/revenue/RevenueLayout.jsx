@@ -6,6 +6,7 @@ import { ROLE_ADMIN, ROLE_MANAGER } from "../../../utils/constant";
 import { setFilterTheaterId } from "../../../redux/revenueSlice";
 import { useGetRevenue } from "./useGetRevenue";
 import RevenueChart from "./RevenueChart";
+import RevenueByTimeChart from "./RevenueByTimeChart";
 import RevenueByMovie from "./RevenueByMovie";
 import RevenueByConcession from "./RevenueByConcession";
 import RevenueByTheater from "./RevenueByTheater";
@@ -47,6 +48,7 @@ function RevenueLayout() {
       ) : (
         <>
           <RevenueChart revenue={revenue} />
+          <RevenueByTimeChart revenue={revenue} />
           <div className="flex flex-col xl:flex-row xl:gap-4 xl:mt-5">
             <RevenueByMovie revenue={revenue} />
             {user.role === ROLE_ADMIN && <RevenueByTheater revenue={revenue} />}

@@ -15,9 +15,10 @@ export const createBooking = async (bookingData) => {
   return response.data;
 };
 
-export const checkinTicket = async (paymentId) => {
+export const checkinTicket = async ({ paymentId, employeeId }) => {
   const response = await axios.post(`/api/employee/bookings/checkin`, {
     paymentId,
+    employeeId,
   });
   return response.data;
 };
