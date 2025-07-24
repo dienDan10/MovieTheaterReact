@@ -22,3 +22,12 @@ export const getBookingDetails = async (paymentId) => {
   const response = await axios.get(`/api/bookings/payment/${paymentId}`);
   return response.data;
 };
+
+export const getBookingHistory = async () => {
+  const response = await axios.get("/api/bookings/history");
+  return response.data;
+}
+
+export function cancelBooking(paymentId) {
+  return axios.delete(`/api/bookings/payment/${paymentId}`);
+}
