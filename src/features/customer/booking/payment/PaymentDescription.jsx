@@ -1,19 +1,31 @@
 import { useSelector } from "react-redux";
 import PaymentCardItem from "../../../../components/PaymentCardItem";
+import { SEAT_TYPE_NORMAL, SEAT_TYPE_VIP } from "../../../../utils/constant";
 
 function PaymentDescription() {
   const { seats, concessions, showtime } = useSelector(
     (state) => state.booking
   );
 
-  const seatsSelected = seats.filter((seat) => seat.isSelected);
+  // calculate normal seats and normal seats price
+  const normalSeats = seats.filter(
+    (seat) => seat.seatType === SEAT_TYPE_NORMAL && seat.isSelected
+  );
+  const normalSeatsPrice = normalSeats.length * showtime.ticketPrice;
+
+  // calculate vip seats and vip seats price
+  const vipSeats = seats.filter(
+    (seat) => seat.seatType === SEAT_TYPE_VIP && seat.isSelected
+  );
+  const vipSeatsPrice = vipSeats.length * showtime.vipTicketPrice;
+  // calculate concessions
   const concessionsSelected = concessions.filter(
     (concession) => concession.count > 0
   );
 
-  const totalSeatsPrice = seatsSelected.length * showtime.ticketPrice;
   const totalPrice =
-    totalSeatsPrice +
+    normalSeatsPrice +
+    vipSeatsPrice +
     concessionsSelected.reduce((total, concession) => {
       return total + concession.price * concession.count;
     }, 0);
@@ -30,15 +42,28 @@ function PaymentDescription() {
           <span className="w-1/4 text-center font-medium">SỐ LƯỢNG</span>
           <span className="w-1/4 text-right font-medium">THÀNH TIỀN</span>
         </div>
-        <PaymentCardItem
-          description="Ghế"
-          quantity={seatsSelected.length}
-          price={`${
-            totalSeatsPrice > 0
-              ? new Intl.NumberFormat("vi-VN").format(totalSeatsPrice)
-              : 0
-          } ₫`}
-        />
+        {normalSeats.length > 0 && (
+          <PaymentCardItem
+            description="Ghế thường"
+            quantity={normalSeats.length}
+            price={`${
+              normalSeatsPrice > 0
+                ? new Intl.NumberFormat("vi-VN").format(normalSeatsPrice)
+                : 0
+            } ₫`}
+          />
+        )}
+        {vipSeats.length > 0 && (
+          <PaymentCardItem
+            description="Ghế VIP"
+            quantity={vipSeats.length}
+            price={`${
+              vipSeatsPrice > 0
+                ? new Intl.NumberFormat("vi-VN").format(vipSeatsPrice)
+                : 0
+            } ₫`}
+          />
+        )}
         {concessionsSelected.length > 0 &&
           concessionsSelected.map((concession) => (
             <PaymentCardItem

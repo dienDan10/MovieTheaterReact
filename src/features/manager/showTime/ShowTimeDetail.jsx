@@ -49,7 +49,8 @@ const ShowTimeDetail = () => {
     return null;
   }
 
-  const { id, date, startTime, endTime, ticketPrice } = selectedShowtime;
+  const { id, date, startTime, endTime, ticketPrice, vipTicketPrice } =
+    selectedShowtime;
   const movie = movieData || { title: "Loading...", duration: 0 };
   const screen = screenData || { name: "Loading..." };
 
@@ -84,6 +85,7 @@ const ShowTimeDetail = () => {
     form.setFieldsValue({
       startTime: dayjs(`2000-01-01 ${startTime}`),
       ticketPrice: ticketPrice,
+      vipTicketPrice: vipTicketPrice,
     });
     setIsEditing(true);
   };
@@ -98,6 +100,7 @@ const ShowTimeDetail = () => {
         startTime: newStartTime,
         endTime: newEndTime,
         ticketPrice: values.ticketPrice,
+        vipTicketPrice: values.vipTicketPrice,
       });
 
       setIsEditing(false);
@@ -198,6 +201,24 @@ const ShowTimeDetail = () => {
               addonAfter="đ"
             />
           </Form.Item>
+
+          <Form.Item
+            name="vipTicketPrice"
+            label="VIP Ticket Price"
+            rules={[
+              { required: true, message: "Please enter VIP ticket price" },
+            ]}
+          >
+            <InputNumber
+              className="w-full"
+              min={0}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              addonAfter="đ"
+            />
+          </Form.Item>
         </Form>
       ) : (
         <Descriptions bordered column={1}>
@@ -219,6 +240,9 @@ const ShowTimeDetail = () => {
           </Descriptions.Item>
           <Descriptions.Item label="Ticket Price">
             {ticketPrice?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} đ
+          </Descriptions.Item>
+          <Descriptions.Item label="VIP Ticket Price">
+            {vipTicketPrice?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} đ
           </Descriptions.Item>
 
           {!isLoadingMovie && movie?.genre && (

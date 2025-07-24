@@ -5,6 +5,7 @@ import { notify } from "../../../../redux/notificationSlice";
 import {
   ERROR_NOTIFICATION,
   MAX_SEAT_SELECTION,
+  SEAT_TYPE_VIP,
 } from "../../../../utils/constant";
 
 function SeatItem({ seat }) {
@@ -37,6 +38,9 @@ function SeatItem({ seat }) {
 
     if (seat.isSelected)
       return `${baseClasses} bg-green-500 hover:bg-green-600 shadow-[0_0_11px_rgba(0,179,0,1)]`;
+
+    if (seat.seatType === SEAT_TYPE_VIP)
+      return `${baseClasses} bg-fuchsia-500 hover:bg-fuchsia-600 shadow-[0_0_11px_oklch(66.7% 0.295 322.15)]`;
 
     return `${baseClasses} bg-red-500 hover:bg-red-600`;
   };

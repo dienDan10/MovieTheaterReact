@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { SEAT_TYPE_NORMAL, SEAT_TYPE_VIP } from "../../../utils/constant";
 
 function TotalPrice() {
   const { seats, showtime, concessions } = useSelector(
@@ -9,7 +10,10 @@ function TotalPrice() {
   if (seats && showtime && concessions) {
     seats.forEach((seat) => {
       if (seat.isSelected) {
-        totalPrice += showtime?.ticketPrice || 0; // Assuming showtime has a price property
+        if (seat.seatType === SEAT_TYPE_VIP)
+          totalPrice += showtime?.vipTicketPrice || 0;
+        else if (seat.seatType === SEAT_TYPE_NORMAL)
+          totalPrice += showtime?.ticketPrice || 0; // Assuming showtime has a price property
       }
     });
 

@@ -9,4 +9,8 @@ export const ROLE_CUSTOMER = "Customer";
 export const ROLE_MANAGER = "Manager";
 export const ROLE_EMPLOYEE = "Employee";
 
+// seat constants
+export const SEAT_TYPE_NORMAL = "Normal";
+export const SEAT_TYPE_VIP = "Vip";
+
 export const MAX_SEAT_SELECTION = 5; // Maximum number of seats a user can select

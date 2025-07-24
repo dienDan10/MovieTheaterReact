@@ -5,18 +5,20 @@ import RevenueByTheaterModal from "./RevenueByTheaterModal";
 function RevenueByTheater({ revenue }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const theaterStats = {};
-  revenue.forEach(({ payment, movie }) => {
-    const { theaterId, theaterName, amount } = payment;
-    if (!theaterStats[theaterId]) {
-      theaterStats[theaterId] = {
-        theaterId,
+  revenue.forEach(({ theater, movie }) => {
+    const { id, theaterName, amount } = theater;
+    if (!id) return;
+
+    if (!theaterStats[id]) {
+      theaterStats[id] = {
+        theaterId: id,
         theaterName: theaterName.trim(),
         totalTicketCount: 0,
         totalRevenue: 0,
       };
     }
-    theaterStats[theaterId].totalRevenue += amount;
-    theaterStats[theaterId].totalTicketCount += movie.ticketCount;
+    theaterStats[id].totalRevenue += amount;
+    theaterStats[id].totalTicketCount += movie.ticketCount;
   });
 
   const result = Object.values(theaterStats).sort(

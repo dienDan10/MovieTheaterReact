@@ -9,6 +9,8 @@ function RevenueByMovie({ revenue }) {
   revenue.forEach(({ movie }) => {
     const { id, title, ticketCount, amount } = movie;
 
+    if (!id) return;
+
     if (!movieStats[id]) {
       movieStats[id] = {
         movieId: id,

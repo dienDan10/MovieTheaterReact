@@ -19,7 +19,11 @@ function SeatDescription() {
       </div>
       <div className="flex items-center">
         <div className="w-6 h-6 bg-red-500 rounded mr-2"></div>
-        <span>Có thể chọn</span>
+        <span>Ghế thường</span>
+      </div>
+      <div className="flex items-center">
+        <div className="w-6 h-6 bg-fuchsia-500 rounded mr-2"></div>
+        <span>Ghế VIP</span>
       </div>
     </div>
   );

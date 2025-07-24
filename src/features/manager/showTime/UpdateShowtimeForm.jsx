@@ -16,6 +16,7 @@ const UpdateShowtimeForm = ({ showtime, onClose }) => {
       form.setFieldsValue({
         startTime: dayjs(`2000-01-01 ${showtime.startTime}`),
         ticketPrice: showtime.ticketPrice,
+        vipTicketPrice: showtime.vipTicketPrice,
       });
     }
   }, [showtime, form]);
@@ -46,6 +47,7 @@ const UpdateShowtimeForm = ({ showtime, onClose }) => {
         startTime: newStartTime,
         endTime: newEndTime,
         ticketPrice: values.ticketPrice,
+        vipTicketPrice: values.vipTicketPrice,
       });
 
       if (onClose) onClose();
@@ -86,6 +88,22 @@ const UpdateShowtimeForm = ({ showtime, onClose }) => {
         name="ticketPrice"
         label="Ticket Price"
         rules={[{ required: true, message: "Please enter ticket price" }]}
+      >
+        <InputNumber
+          className="w-full"
+          min={0}
+          formatter={(value) =>
+            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          }
+          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          addonAfter="đ"
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="vipTicketPrice"
+        label="VIP Ticket Price"
+        rules={[{ required: true, message: "Please enter VIP ticket price" }]}
       >
         <InputNumber
           className="w-full"

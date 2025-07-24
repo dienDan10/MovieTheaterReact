@@ -117,7 +117,11 @@ const SeatGrid = () => {
         <div className="flex justify-center gap-8">
           <div className="flex items-center">
             <div className="w-6 h-6 bg-green-500 rounded mr-2"></div>
-            <span>Enabled Seat</span>
+            <span>Normal Seat</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-6 h-6 bg-yellow-500 rounded mr-2"></div>
+            <span>VIP Seat</span>
           </div>
           <div className="flex items-center">
             <div className="w-6 h-6 bg-red-500 rounded mr-2"></div>

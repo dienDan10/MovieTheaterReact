@@ -22,6 +22,7 @@ export const createShowTimes = async ({
   screenId,
   showTimes,
   ticketPrice,
+  vipTicketPrice,
 }) => {
   // showTimes: [ { date, startTimes: ["HH:mm", "HH:mm"], endTimes: ["HH:mm", "HH:mm"] } ]
   const res = await customAxios.post("/api/showtimes", {
@@ -29,6 +30,7 @@ export const createShowTimes = async ({
     screenId,
     showTimes,
     ticketPrice,
+    vipTicketPrice,
   });
   return res.data;
 };
@@ -38,11 +40,13 @@ export const updateShowTime = async ({
   startTime,
   endTime,
   ticketPrice,
+  vipTicketPrice,
 }) => {
   const res = await customAxios.put(`/api/showtimes/${id}`, {
     startTime,
     endTime,
     ticketPrice,
+    vipTicketPrice,
   });
   return res.data;
 };

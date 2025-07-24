@@ -17,6 +17,7 @@ import {
 import dayjs from "dayjs";
 import { GiFilmSpool } from "react-icons/gi";
 import { IoReceiptOutline } from "react-icons/io5";
+import { SEAT_TYPE_VIP } from "../../../../utils/constant";
 
 function PaymentInformation() {
   const { paymentDetails } = useSelector((state) => state.bookingConfirm);
@@ -105,10 +106,17 @@ function PaymentInformation() {
                       {seats.map((seat) => (
                         <span
                           key={seat.id}
-                          className="inline-block bg-gray-200 px-2 py-1 rounded text-xs mr-2 mb-1"
+                          className={`inline-block px-2 py-1 rounded text-xs mr-2 mb-1 ${
+                            seat.seatType === SEAT_TYPE_VIP
+                              ? "bg-amber-200 text-amber-800 border border-amber-400"
+                              : "bg-gray-200 text-gray-800"
+                          }`}
                         >
                           {seat.seatRow}
                           {seat.seatNumber}
+                          {seat.seatType === "VIP" && (
+                            <span className="ml-1">★</span>
+                          )}
                         </span>
                       ))}
                     </p>
@@ -183,8 +191,18 @@ function PaymentInformation() {
                     <span>
                       Seat {seat.seatRow}
                       {seat.seatNumber}
+                      {seat.seatType === SEAT_TYPE_VIP && (
+                        <span className="ml-1 text-amber-600 font-medium">
+                          ★ VIP
+                        </span>
+                      )}
                     </span>
-                    <span>{showTime.ticketPrice.toLocaleString()} đ</span>
+                    <span>
+                      {seat.seatType === SEAT_TYPE_VIP
+                        ? showTime.vipTicketPrice.toLocaleString()
+                        : showTime.ticketPrice.toLocaleString()}{" "}
+                      đ
+                    </span>
                   </div>
                 ))}
 

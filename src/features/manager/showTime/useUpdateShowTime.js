@@ -16,9 +16,15 @@ export default function useUpdateShowTime() {
   const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: ({ id, startTime, endTime, ticketPrice }) => {
+    mutationFn: ({ id, startTime, endTime, ticketPrice, vipTicketPrice }) => {
       dispatch(setLoading({ key: "update", value: true }));
-      return updateShowTime({ id, startTime, endTime, ticketPrice });
+      return updateShowTime({
+        id,
+        startTime,
+        endTime,
+        ticketPrice,
+        vipTicketPrice,
+      });
     },
 
     onSuccess: () => {
