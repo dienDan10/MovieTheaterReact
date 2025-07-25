@@ -8,6 +8,7 @@ import { ERROR_NOTIFICATION } from "../../../utils/constant";
 import { useCreateBooking } from "./useCreateBooking";
 import { SpinnerSmall } from "../../../components/Spinner";
 import PromotionList from "./PromotionList";
+import PointsDiscount from "./PointsDiscount";
 
 function BookingDetails() {
   const {
@@ -19,6 +20,8 @@ function BookingDetails() {
     user,
     concessions,
     selectedPromotion,
+    usePoints,
+    pointsToUse,
   } = useSelector((state) => state.booking);
   const { user: userInfo } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -61,6 +64,7 @@ function BookingDetails() {
             quantity: concession.count,
           })),
         promotionId: selectedPromotion?.id || null,
+        pointsUsed: usePoints ? pointsToUse : 0,
       };
 
       createBooking(bookingData);
@@ -98,6 +102,8 @@ function BookingDetails() {
       <TotalPrice />
       {/* Promotions */}
       <PromotionList />
+      {/* Points Discount */}
+      <PointsDiscount />
       <div className="flex flex-row justify-between items-center gap-5">
         <button
           className={`flex-1 flex items-center justify-center px-6 py-2 border-1 rounded-lg border-neutral-300 transition-colors duration-200 ${

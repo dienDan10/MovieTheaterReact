@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { MINIMUM_TOTAL_PRICE, POINTS_TO_VND_RATIO } from "../utils/constant";
 
 const initialState = {
   step: 1,
@@ -11,6 +12,8 @@ const initialState = {
   movie: null,
   concessions: [],
   selectedPromotion: null,
+  usePoints: false,
+  pointsToUse: 0,
   user: {
     username: null,
     email: null,
@@ -93,6 +96,33 @@ export const bookingSlice = createSlice({
     setSelectedPromotion: (state, action) => {
       state.selectedPromotion = action.payload;
     },
+    toggleUsePoints: (state, action) => {
+      state.usePoints = action.payload;
+      if (!action.payload) {
+        state.pointsToUse = 0;
+      }
+    },
+    setPointsToUse: (state, action) => {
+      state.pointsToUse = action.payload;
+    },
+    // Calculate optimal points to use based on subtotal and promotion discount
+    calculateOptimalPointsToUse: (state, action) => {
+      const { subtotal, promotionDiscount, availablePoints } = action.payload;
+
+      console.log(subtotal, promotionDiscount, availablePoints);
+
+      // Calculate maximum allowable discount from points
+      const maxAllowableDiscount =
+        subtotal - promotionDiscount - MINIMUM_TOTAL_PRICE;
+
+      // Calculate how many points are needed for this discount
+      const pointsNeeded = Math.ceil(
+        maxAllowableDiscount / POINTS_TO_VND_RATIO
+      );
+
+      // Use only the points needed, capped by available points
+      state.pointsToUse = Math.min(Math.max(0, pointsNeeded), availablePoints);
+    },
   },
 });
 
@@ -107,6 +137,9 @@ export const {
   decreaseConcessionCount,
   setUserInformation,
   setSelectedPromotion,
+  toggleUsePoints,
+  setPointsToUse,
+  calculateOptimalPointsToUse,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

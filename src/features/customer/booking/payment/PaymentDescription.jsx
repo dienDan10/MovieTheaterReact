@@ -1,11 +1,22 @@
 import { useSelector } from "react-redux";
 import PaymentCardItem from "../../../../components/PaymentCardItem";
-import { SEAT_TYPE_NORMAL, SEAT_TYPE_VIP } from "../../../../utils/constant";
+import {
+  MINIMUM_TOTAL_PRICE,
+  POINTS_TO_VND_RATIO,
+  PROMOTION_TYPE_PERCENTAGE,
+  SEAT_TYPE_NORMAL,
+  SEAT_TYPE_VIP,
+} from "../../../../utils/constant";
 
 function PaymentDescription() {
-  const { seats, concessions, showtime, selectedPromotion } = useSelector(
-    (state) => state.booking
-  );
+  const {
+    seats,
+    concessions,
+    showtime,
+    selectedPromotion,
+    usePoints,
+    pointsToUse,
+  } = useSelector((state) => state.booking);
 
   // calculate normal seats and normal seats price
   const normalSeats = seats.filter(
@@ -31,20 +42,38 @@ function PaymentDescription() {
       return total + concession.price * concession.count;
     }, 0);
 
-  // Calculate discount if there's a selected promotion
-  let discount = 0;
+  // Calculate promotion discount if there's a selected promotion
+  let promotionDiscount = 0;
   if (selectedPromotion) {
-    if (selectedPromotion.discountType === "Percentage") {
-      discount = Math.round(subtotal * (selectedPromotion.discountValue / 100));
+    if (selectedPromotion.discountType === PROMOTION_TYPE_PERCENTAGE) {
+      promotionDiscount = Math.round(
+        subtotal * (selectedPromotion.discountValue / 100)
+      );
     } else {
-      discount = selectedPromotion.discountValue;
+      promotionDiscount = selectedPromotion.discountValue;
     }
-    // Ensure discount doesn't exceed subtotal
-    discount = Math.min(discount, subtotal);
+    // Ensure promotion discount doesn't exceed subtotal
+    promotionDiscount = Math.min(promotionDiscount, subtotal);
   }
 
-  // Calculate final total price
-  const totalPrice = subtotal - discount;
+  // Calculate points discount if enabled
+  let pointsDiscount = 0;
+  if (usePoints && pointsToUse > 0) {
+    // Convert points to VND (100 points = 1000 VND)
+    pointsDiscount = Math.round(pointsToUse * POINTS_TO_VND_RATIO);
+
+    // Calculate maximum possible discount while maintaining minimum price
+    const maxAllowableDiscount = subtotal - MINIMUM_TOTAL_PRICE;
+    const maxPointsDiscount = maxAllowableDiscount - promotionDiscount;
+
+    // Ensure points discount doesn't exceed remaining amount after promotion discount
+    // and doesn't make the total go below the minimum price
+    pointsDiscount = Math.min(pointsDiscount, Math.max(0, maxPointsDiscount));
+  }
+
+  // Calculate total discount and final price
+  const totalDiscount = promotionDiscount + pointsDiscount;
+  const totalPrice = Math.max(subtotal - totalDiscount, MINIMUM_TOTAL_PRICE);
   return (
     <div className="w-full mx-auto bg-[#f9fbfd] rounded-lg shadow-md text-sm overflow-hidden">
       <div className="border-b border-gray-200 text-gray-500 font-medium px-5 pt-4 pb-5 bg-stone-200">
@@ -94,19 +123,33 @@ function PaymentDescription() {
             />
           ))}
 
-        {discount > 0 && (
+        {totalDiscount > 0 && (
           <>
             <PaymentCardItem
               description="Tạm tính"
               quantity={""}
               price={`${new Intl.NumberFormat("vi-VN").format(subtotal)} ₫`}
             />
-            <PaymentCardItem
-              description={`Khuyến mãi (${selectedPromotion.description})`}
-              quantity={""}
-              price={`-${new Intl.NumberFormat("vi-VN").format(discount)} ₫`}
-              isDiscount={true}
-            />
+            {promotionDiscount > 0 && (
+              <PaymentCardItem
+                description={`Khuyến mãi (${selectedPromotion.description})`}
+                quantity={""}
+                price={`-${new Intl.NumberFormat("vi-VN").format(
+                  promotionDiscount
+                )} ₫`}
+                isDiscount={true}
+              />
+            )}
+            {pointsDiscount > 0 && (
+              <PaymentCardItem
+                description={`Điểm tích lũy (${pointsToUse} điểm)`}
+                quantity={""}
+                price={`-${new Intl.NumberFormat("vi-VN").format(
+                  pointsDiscount
+                )} ₫`}
+                isDiscount={true}
+              />
+            )}
           </>
         )}
 

@@ -7,7 +7,7 @@ function SelectConcessionLayout() {
   if (!concessions || concessions.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 flex-[2]">
+    <div className="bg-white rounded-lg shadow-md p-6 flex-[2] self-start mt-14">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-800 flex-2">COMBO</h2>
