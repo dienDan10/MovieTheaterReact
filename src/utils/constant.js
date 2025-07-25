@@ -13,4 +13,9 @@ export const ROLE_EMPLOYEE = "Employee";
 export const SEAT_TYPE_NORMAL = "Normal";
 export const SEAT_TYPE_VIP = "Vip";
 
-export const MAX_SEAT_SELECTION = 5; // Maximum number of seats a user can select
+// Maximum number of seats a user can select
+export const MAX_SEAT_SELECTION = 5;
+
+// Promotion types
+export const PROMOTION_TYPE_PERCENTAGE = "Percentage";
+export const PROMOTION_TYPE_FIXED = "FixedAmount";

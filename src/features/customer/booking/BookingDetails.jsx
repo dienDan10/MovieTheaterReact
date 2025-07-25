@@ -7,10 +7,19 @@ import { notify } from "../../../redux/notificationSlice";
 import { ERROR_NOTIFICATION } from "../../../utils/constant";
 import { useCreateBooking } from "./useCreateBooking";
 import { SpinnerSmall } from "../../../components/Spinner";
+import PromotionList from "./PromotionList";
 
 function BookingDetails() {
-  const { step, seats, theater, screen, showtime, user, concessions } =
-    useSelector((state) => state.booking);
+  const {
+    step,
+    seats,
+    theater,
+    screen,
+    showtime,
+    user,
+    concessions,
+    selectedPromotion,
+  } = useSelector((state) => state.booking);
   const { user: userInfo } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const { mutate: createBooking, isPending } = useCreateBooking();
@@ -51,6 +60,7 @@ function BookingDetails() {
             id: concession.id,
             quantity: concession.count,
           })),
+        promotionId: selectedPromotion?.id || null,
       };
 
       createBooking(bookingData);
@@ -86,6 +96,8 @@ function BookingDetails() {
         </div>
       )}
       <TotalPrice />
+      {/* Promotions */}
+      <PromotionList />
       <div className="flex flex-row justify-between items-center gap-5">
         <button
           className={`flex-1 flex items-center justify-center px-6 py-2 border-1 rounded-lg border-neutral-300 transition-colors duration-200 ${

@@ -5,6 +5,11 @@ export const getPromotions = async () => {
   return response.data;
 };
 
+export const getActivePromotions = async () => {
+  const response = await axios.get("/api/promotions/active");
+  return response.data;
+};
+
 export const getPromotionById = async (id) => {
   const response = await axios.get(`/api/promotions/${id}`);
   return response.data;

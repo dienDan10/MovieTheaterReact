@@ -3,7 +3,7 @@ import PaymentCardItem from "../../../../components/PaymentCardItem";
 import { SEAT_TYPE_NORMAL, SEAT_TYPE_VIP } from "../../../../utils/constant";
 
 function PaymentDescription() {
-  const { seats, concessions, showtime } = useSelector(
+  const { seats, concessions, showtime, selectedPromotion } = useSelector(
     (state) => state.booking
   );
 
@@ -23,12 +23,28 @@ function PaymentDescription() {
     (concession) => concession.count > 0
   );
 
-  const totalPrice =
+  // Calculate subtotal
+  const subtotal =
     normalSeatsPrice +
     vipSeatsPrice +
     concessionsSelected.reduce((total, concession) => {
       return total + concession.price * concession.count;
     }, 0);
+
+  // Calculate discount if there's a selected promotion
+  let discount = 0;
+  if (selectedPromotion) {
+    if (selectedPromotion.discountType === "Percentage") {
+      discount = Math.round(subtotal * (selectedPromotion.discountValue / 100));
+    } else {
+      discount = selectedPromotion.discountValue;
+    }
+    // Ensure discount doesn't exceed subtotal
+    discount = Math.min(discount, subtotal);
+  }
+
+  // Calculate final total price
+  const totalPrice = subtotal - discount;
   return (
     <div className="w-full mx-auto bg-[#f9fbfd] rounded-lg shadow-md text-sm overflow-hidden">
       <div className="border-b border-gray-200 text-gray-500 font-medium px-5 pt-4 pb-5 bg-stone-200">
@@ -78,10 +94,27 @@ function PaymentDescription() {
             />
           ))}
 
+        {discount > 0 && (
+          <>
+            <PaymentCardItem
+              description="Tạm tính"
+              quantity={""}
+              price={`${new Intl.NumberFormat("vi-VN").format(subtotal)} ₫`}
+            />
+            <PaymentCardItem
+              description={`Khuyến mãi (${selectedPromotion.description})`}
+              quantity={""}
+              price={`-${new Intl.NumberFormat("vi-VN").format(discount)} ₫`}
+              isDiscount={true}
+            />
+          </>
+        )}
+
         <PaymentCardItem
           description="Tổng"
           quantity={""}
           price={new Intl.NumberFormat("vi-VN").format(totalPrice) + " đ"}
+          isBold={true}
         />
       </div>
     </div>

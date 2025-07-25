@@ -13,6 +13,7 @@ import concessionReducer from "./redux/concessionSlice";
 import bookingConfirmReducer from "./redux/bookingConfirmSlice";
 import employeeBookingReducer from "./redux/employeeBookingSlice";
 import revenueReducer from "./redux/revenueSlice";
+import promotionReducer from "./redux/promotionSlice";
 
 const store = configureStore({
   reducer: {
@@ -31,6 +32,7 @@ const store = configureStore({
     bookingConfirm: bookingConfirmReducer,
     employeeBooking: employeeBookingReducer,
     revenue: revenueReducer,
+    promotion: promotionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -38,6 +38,7 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("concessions")) return "11";
     if (pathname.includes("checkin")) return "12";
     if (pathname.includes("booking")) return "13";
+    if (pathname.includes("promotions")) return "14";
   };
 
   const selectedKey = calcSelectedKey();

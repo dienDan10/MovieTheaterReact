@@ -10,6 +10,7 @@ const initialState = {
   showtime: null,
   movie: null,
   concessions: [],
+  selectedPromotion: null,
   user: {
     username: null,
     email: null,
@@ -89,6 +90,9 @@ export const bookingSlice = createSlice({
         seat.isSelected = !seat.isSelected;
       }
     },
+    setSelectedPromotion: (state, action) => {
+      state.selectedPromotion = action.payload;
+    },
   },
 });
 
@@ -102,6 +106,7 @@ export const {
   increaseConcessionCount,
   decreaseConcessionCount,
   setUserInformation,
+  setSelectedPromotion,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
