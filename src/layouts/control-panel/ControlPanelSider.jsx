@@ -4,6 +4,7 @@ import {
   MdAccountCircle,
   MdChair,
   MdFastfood,
+  MdOutlineDiscount,
   MdOutlinePlaylistAddCheckCircle,
   MdSpaceDashboard,
 } from "react-icons/md";
@@ -89,6 +90,11 @@ function ControlPanelSider({ collapsed }) {
             key: "6",
             icon: <RiMovie2AiFill />,
             label: <Link to="theaters">Theaters</Link>,
+          },
+          isAdmin && {
+            key: "14",
+            icon: <MdOutlineDiscount />,
+            label: <Link to="promotions">Promotions</Link>,
           },
           (isAdmin || isManager) && {
             key: "7",

@@ -64,6 +64,9 @@ const EmployeeBookingLayout = lazy(() =>
 const RevenueLayout = lazy(() =>
   import("./features/manager/revenue/RevenueLayout")
 );
+const PromotionLayout = lazy(() =>
+  import("./features/admin/promotion/PromotionLayout")
+);
 
 const router = createBrowserRouter([
   {
@@ -259,6 +262,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <EmployeeBookingLayout />
+          </Suspense>
+        ),
+      },
+      {
+        path: "promotions",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <PromotionLayout />
           </Suspense>
         ),
       },
