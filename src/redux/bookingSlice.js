@@ -1,6 +1,5 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getBookingHistory, getBookingDetails, cancelBooking as cancelBookingApi } from "../services/apiBooking";
-
+import { createSlice } from "@reduxjs/toolkit";
+import { format } from "date-fns";
 const initialState = {
   step: 1,
   seatRows: [],
@@ -16,51 +15,15 @@ const initialState = {
     email: null,
     phone: null,
   },
-  history: [],
-  bookingDetail: null,
-  loading: false,
-  loadingDetail: false,
-  error: null,
+  bookingHistoryFilter: {
+    fromDate: format(new Date(), "yyyy-MM-dd"),
+    toDate: format(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      "yyyy-MM-dd"
+    ),
+  },
 };
 
-// Thunk: fetch booking history
-export const fetchBookingHistory = createAsyncThunk(
-  "booking/fetchBookingHistory",
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await getBookingHistory();
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Lỗi lấy lịch sử giao dịch");
-    }
-  }
-);
-
-// Thunk: fetch booking detail
-export const fetchBookingDetail = createAsyncThunk(
-  "booking/fetchBookingDetail",
-  async (paymentId, { rejectWithValue }) => {
-    try {
-      const res = await getBookingDetails(paymentId);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Lỗi lấy chi tiết giao dịch");
-    }
-  }
-);
-
-// Thunk: cancel booking
-export const cancelBooking = createAsyncThunk(
-  "booking/cancelBooking",
-  async (paymentId, { rejectWithValue }) => {
-    try {
-      await cancelBookingApi(paymentId);
-      return paymentId;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Lỗi huỷ giao dịch");
-    }
-  }
-);
 export const bookingSlice = createSlice({
   name: "booking",
   initialState,
@@ -127,44 +90,17 @@ export const bookingSlice = createSlice({
     clearBookingDetail: (state) => {
       state.bookingDetail = null;
     },
+    setBookingHistoryFilter: (state, action) => {
+      // Merge new filter values with existing filter (like showtimeFilter)
+      state.bookingHistoryFilter = {
+        ...state.bookingHistoryFilter,
+        ...action.payload,
+      };
+    },
+    resetBookingHistoryFilter: (state) => {
+      state.bookingHistoryFilter = initialState.bookingHistoryFilter;
+    },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchBookingHistory.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchBookingHistory.fulfilled, (state, action) => {
-        state.loading = false;
-        state.history = action.payload;
-      })
-      .addCase(fetchBookingHistory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(fetchBookingDetail.pending, (state) => {
-        state.loadingDetail = true;
-        state.error = null;
-      })
-      .addCase(fetchBookingDetail.fulfilled, (state, action) => {
-        state.loadingDetail = false;
-        state.bookingDetail = action.payload;
-      })
-      .addCase(fetchBookingDetail.rejected, (state, action) => {
-        state.loadingDetail = false;
-        state.error = action.payload;
-      })
-      .addCase(cancelBooking.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(cancelBooking.fulfilled, (state, action) => {
-        // Xoá booking khỏi history khi huỷ thành công
-        state.history = state.history.filter((b) => b.paymentId !== action.payload);
-      })
-      .addCase(cancelBooking.rejected, (state, action) => {
-        state.error = action.payload;
-      });
-  }
 });
 
 export const {
@@ -178,6 +114,8 @@ export const {
   decreaseConcessionCount,
   setUserInformation,
   clearBookingDetail,
+  setBookingHistoryFilter,
+  resetBookingHistoryFilter,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
