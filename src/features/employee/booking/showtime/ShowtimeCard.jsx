@@ -73,9 +73,11 @@ function ShowtimeCard({ date, movie, showtimes }) {
           <Divider orientation="left">Showtimes</Divider>
 
           <div className="flex flex-wrap gap-2 mt-5 mb-5">
-            {showtimes.map((showtime) => (
-              <ShowtimeItem key={showtime.id} showtime={showtime} />
-            ))}
+            {showtimes
+              .sort((a, b) => a.startTime.localeCompare(b.startTime))
+              .map((showtime) => (
+                <ShowtimeItem key={showtime.id} showtime={showtime} />
+              ))}
           </div>
         </div>
       </div>

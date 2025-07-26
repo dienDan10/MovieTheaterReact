@@ -109,8 +109,6 @@ export const bookingSlice = createSlice({
     calculateOptimalPointsToUse: (state, action) => {
       const { subtotal, promotionDiscount, availablePoints } = action.payload;
 
-      console.log(subtotal, promotionDiscount, availablePoints);
-
       // Calculate maximum allowable discount from points
       const maxAllowableDiscount =
         subtotal - promotionDiscount - MINIMUM_TOTAL_PRICE;

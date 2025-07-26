@@ -15,7 +15,10 @@ import {
 } from "@ant-design/icons";
 import { GiFilmSpool } from "react-icons/gi";
 import { IoReceiptOutline } from "react-icons/io5";
-import { SEAT_TYPE_VIP } from "../../../../utils/constant";
+import {
+  SEAT_TYPE_VIP,
+  PROMOTION_TYPE_PERCENTAGE,
+} from "../../../../utils/constant";
 
 function TicketDetail() {
   const { paymentDetails } = useSelector((state) => state.employeeBooking);
@@ -37,9 +40,25 @@ function TicketDetail() {
           <CheckCircleOutlined className="mr-2" /> Booking Confirmed!
         </h1>
         <p className="text-lg mt-2">
-          Thank you for your booking, {payment.name}!
+          {payment.userId ? "Customer" : "Guest"} booking for {payment.name}
         </p>
-        <p className="text-sm text-gray-500">Confirmation #{payment.id}</p>
+        <div className="flex justify-center gap-4 mt-2">
+          <p className="text-sm text-gray-500">
+            Booking #{paymentDetails.booking?.id || payment.id}
+          </p>
+          <p className="text-sm text-gray-500">Payment #{payment.id}</p>
+          <p className="text-sm text-gray-500">
+            {payment.paymentStatus === "Pending" ? (
+              <span className="inline-block bg-yellow-200 text-yellow-800 text-xs font-medium px-2 py-1 rounded">
+                <ClockCircleOutlined className="mr-1" /> Pending
+              </span>
+            ) : (
+              <span className="inline-block bg-green-200 text-green-800 text-xs font-medium px-2 py-1 rounded">
+                <CheckCircleOutlined className="mr-1" /> Success
+              </span>
+            )}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -215,9 +234,74 @@ function TicketDetail() {
                 ))}
 
                 <hr />
+
+                {/* Subtotal */}
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{payment.totalAmount?.toLocaleString() || "0"} đ</span>
+                </div>
+
+                {/* Discount section */}
+                {payment.discountAmount > 0 && (
+                  <div className="text-red-600">
+                    {/* Promotion discount */}
+                    {paymentDetails.promotion && (
+                      <div className="flex justify-between">
+                        <span>
+                          Promotion: <br />
+                          <span className="text-xs italic">
+                            ({paymentDetails.promotion.description})
+                          </span>
+                          {paymentDetails.promotion.discountType ===
+                          PROMOTION_TYPE_PERCENTAGE
+                            ? ` (${paymentDetails.promotion.discountValue}%)`
+                            : ""}
+                        </span>
+                        <span>
+                          -{" "}
+                          {(paymentDetails.promotion.discountType ===
+                          PROMOTION_TYPE_PERCENTAGE
+                            ? (
+                                payment.totalAmount *
+                                (paymentDetails.promotion.discountValue / 100)
+                              ).toFixed(0)
+                            : paymentDetails.promotion.discountValue
+                          ).toLocaleString()}{" "}
+                          đ
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Points used */}
+                    {payment.bonusPointsUsed > 0 && (
+                      <div className="flex justify-between">
+                        <span>
+                          Points used:{" "}
+                          {payment.bonusPointsUsed.toLocaleString()} points
+                        </span>
+                        <span>
+                          - {(payment.bonusPointsUsed * 10).toLocaleString()} đ
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Total discount */}
+                    <div className="flex justify-between font-medium">
+                      <span>Total Discount</span>
+                      <span>- {payment.discountAmount.toLocaleString()} đ</span>
+                    </div>
+                  </div>
+                )}
+
+                <hr />
                 <div className="flex justify-between font-semibold text-base">
-                  <span>Total</span>
-                  <span>{payment.amount.toLocaleString()} đ</span>
+                  <span>Final Total</span>
+                  <span>
+                    {payment.finalAmount?.toLocaleString() ||
+                      payment.amount?.toLocaleString() ||
+                      "0"}{" "}
+                    đ
+                  </span>
                 </div>
               </div>
             </div>
@@ -274,6 +358,25 @@ function TicketDetail() {
               <p>
                 <strong>Phone:</strong> {payment.phoneNumber}
               </p>
+
+              {payment.userId && payment.bonusPointsUsed >= 0 && (
+                <div className="mt-2 pt-2 border-t border-dashed">
+                  <p className="flex justify-between">
+                    <span className="text-gray-600">Loyalty Points Used:</span>
+                    <span className="font-medium">
+                      {payment.bonusPointsUsed.toLocaleString()}
+                    </span>
+                  </p>
+                  {paymentDetails.booking?.pointsEarned > 0 && (
+                    <p className="flex justify-between text-green-600">
+                      <span>Points Earned:</span>
+                      <span className="font-medium">
+                        +{paymentDetails.booking.pointsEarned.toLocaleString()}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

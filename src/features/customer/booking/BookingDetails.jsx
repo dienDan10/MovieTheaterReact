@@ -4,7 +4,13 @@ import TotalPrice from "./TotalPrice";
 import { HiArrowLongLeft } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import { notify } from "../../../redux/notificationSlice";
-import { ERROR_NOTIFICATION } from "../../../utils/constant";
+import {
+  ERROR_NOTIFICATION,
+  SEAT_TYPE_VIP,
+  PROMOTION_TYPE_PERCENTAGE,
+  MINIMUM_TOTAL_PRICE,
+  POINTS_TO_VND_RATIO,
+} from "../../../utils/constant";
 import { useCreateBooking } from "./useCreateBooking";
 import { SpinnerSmall } from "../../../components/Spinner";
 import PromotionList from "./PromotionList";
@@ -42,29 +48,83 @@ function BookingDetails() {
       validateUserForm();
       // create booking data to send to the server
 
+      // Calculate pricing information
+      let subtotal = 0;
+      let promotionDiscount = 0;
+      let pointsDiscount = 0;
+      let totalDiscount = 0;
+      let finalAmount = 0;
+
+      // Calculate ticket prices
+      const selectedSeats = seats.filter((seat) => seat.isSelected);
+      selectedSeats.forEach((seat) => {
+        if (seat.seatType === SEAT_TYPE_VIP) {
+          subtotal += showtime?.vipTicketPrice || 0;
+        } else {
+          subtotal += showtime?.ticketPrice || 0;
+        }
+      });
+
+      // Calculate concession prices
+      const selectedConcessions = concessions.filter(
+        (concession) => concession.count > 0
+      );
+      selectedConcessions.forEach((concession) => {
+        subtotal += concession.price * concession.count;
+      });
+
+      // Calculate promotion discount
+      if (selectedPromotion) {
+        if (selectedPromotion.discountType === PROMOTION_TYPE_PERCENTAGE) {
+          promotionDiscount = Math.round(
+            subtotal * (selectedPromotion.discountValue / 100)
+          );
+        } else {
+          promotionDiscount = selectedPromotion.discountValue;
+        }
+        promotionDiscount = Math.min(promotionDiscount, subtotal);
+      }
+
+      // Calculate points discount
+      if (usePoints && pointsToUse > 0) {
+        pointsDiscount = Math.round(pointsToUse * POINTS_TO_VND_RATIO);
+
+        // Calculate maximum possible discount while maintaining minimum price
+        const maxAllowableDiscount = subtotal - MINIMUM_TOTAL_PRICE;
+        const maxPointsDiscount = maxAllowableDiscount - promotionDiscount;
+
+        // Ensure points discount doesn't exceed allowed amount
+        pointsDiscount = Math.min(
+          pointsDiscount,
+          Math.max(0, maxPointsDiscount)
+        );
+      }
+
+      totalDiscount = promotionDiscount + pointsDiscount;
+      finalAmount = Math.max(subtotal - totalDiscount, MINIMUM_TOTAL_PRICE);
+
       const bookingData = {
         userId: userInfo?.id,
         username,
         phone,
         email,
-        seats: seats
-          .filter((seat) => seat.isSelected)
-          .map((seat) => ({
-            id: seat.id,
-            name: seat.seatRow + seat.seatNumber + "",
-            seatType: seat.seatType,
-          })),
+        seats: selectedSeats.map((seat) => ({
+          id: seat.id,
+          name: seat.seatRow + seat.seatNumber + "",
+          seatType: seat.seatType,
+        })),
         theaterId: theater.id,
         screenId: screen.id,
         showtimeId: showtime.id,
-        concessions: concessions
-          .filter((concession) => concession.count > 0)
-          .map((concession) => ({
-            id: concession.id,
-            quantity: concession.count,
-          })),
-        promotionId: selectedPromotion?.id || null,
+        concessions: selectedConcessions.map((concession) => ({
+          id: concession.id,
+          quantity: concession.count,
+        })),
+        promotionId: selectedPromotion?.id || 0,
         pointsUsed: usePoints ? pointsToUse : 0,
+        totalAmount: subtotal,
+        discountAmount: totalDiscount,
+        finalAmount: finalAmount,
       };
 
       createBooking(bookingData);
