@@ -31,5 +31,5 @@ export const getBookingHistory = async ({ fromDate, toDate }) => {
 };
 
 export function cancelBooking(paymentId) {
-  return axios.delete(`/api/bookings/payment/${paymentId}`);
+  return axios.put(`/api/bookings/payment/${paymentId}/cancel`);
 }

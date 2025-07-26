@@ -7,6 +7,7 @@ export function useCancelBooking() {
     mutationFn: cancelBooking,
     onSuccess: () => {
       queryClient.invalidateQueries(["bookingHistory"]);
+      queryClient.invalidateQueries(["userProfile"]);
     },
   });
 }

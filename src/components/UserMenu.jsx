@@ -1,6 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
-import { ROLE_ADMIN, ROLE_EMPLOYEE, ROLE_MANAGER } from "../utils/constant";
+import {
+  ROLE_ADMIN,
+  ROLE_CUSTOMER,
+  ROLE_EMPLOYEE,
+  ROLE_MANAGER,
+} from "../utils/constant";
 import { AiOutlineLogout } from "react-icons/ai";
 import { Avatar, Dropdown } from "antd";
 import { FaUser } from "react-icons/fa6";
@@ -26,6 +31,7 @@ function UserMenu() {
   const isAdmin = user?.role !== null && user.role === ROLE_ADMIN;
   const isManager = user?.role !== null && user.role === ROLE_MANAGER;
   const isEmployee = user?.role !== null && user.role === ROLE_EMPLOYEE;
+  const isCustomer = user?.role !== null && user.role === ROLE_CUSTOMER;
 
   const items = [
     {
@@ -35,9 +41,11 @@ function UserMenu() {
           <span className="w-36 block text-sm text-gray-500 truncate">
             {user?.email}
           </span>
-          <span className="w-36 block text-sm text-gray-500 truncate">
-            Điểm tích lũy: {user?.point}
-          </span>
+          {isCustomer && (
+            <span className="w-36 block text-sm text-gray-500 truncate">
+              Điểm tích lũy: {user?.point}
+            </span>
+          )}
         </div>
       ),
       key: "0",
