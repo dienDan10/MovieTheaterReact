@@ -43,6 +43,9 @@ const SeatLayout = lazy(() => import("./features/admin/seat/SeatLayout"));
 const BookingLayout = lazy(() =>
   import("./features/customer/booking/BookingLayout")
 );
+const BookingHistoryPage = lazy(() =>
+  import("./features/customer/booking_history/BookingHistoryPage")
+);
 const ViewShowtimeLayout = lazy(() =>
   import("./features/customer/showtime/ViewShowtimeLayout")
 );
@@ -123,6 +126,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<SpinnerLarge />}>
             <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "booking-history",
+        element: (
+          <Suspense fallback={<SpinnerLarge />}>
+            <BookingHistoryPage />
           </Suspense>
         ),
       },

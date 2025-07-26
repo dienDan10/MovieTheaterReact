@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { MINIMUM_TOTAL_PRICE, POINTS_TO_VND_RATIO } from "../utils/constant";
-
+import { format } from "date-fns";
 const initialState = {
   step: 1,
   seatRows: [],
@@ -19,48 +19,49 @@ const initialState = {
     email: null,
     phone: null,
   },
+  bookingHistoryFilter: {
+    fromDate: format(new Date(), "yyyy-MM-dd"),
+    toDate: format(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      "yyyy-MM-dd"
+    ),
+  },
 };
 
 export const bookingSlice = createSlice({
   name: "booking",
   initialState,
   reducers: {
-    resetBookingState: () => {
-      return initialState;
-    },
+    resetBookingState: () => initialState,
     setSeats: (state, action) => {
-      // Ensure payload is an array
+      // ...existing code...
       const seatsArray = Array.isArray(action.payload) ? action.payload : [];
       state.seats = seatsArray.map((seat) => ({ isSelected: false, ...seat }));
-
-      // Extract unique rows and maximum column number
       const uniqueRows = [
         ...new Set(seatsArray.map((seat) => seat.seatRow)),
       ].sort();
-
-      // Find max column number for each row
       const maxColumnNumber =
         seatsArray.length > 0
           ? Math.max(...seatsArray.map((seat) => seat.seatNumber), 0)
           : 0;
-
       const seatColumns = Array.from(
         { length: maxColumnNumber },
         (_, i) => i + 1
       );
-
       state.seatRows = uniqueRows;
       state.seatColumns = seatColumns;
     },
     setShowtimeData: (state, action) => {
+      // ...existing code...
       const { theater, screen, showTime, movie, concessions } = action.payload;
       state.theater = theater;
       state.screen = screen;
       state.showtime = showTime;
       state.movie = movie;
-      state.concessions = concessions.map((c) => ({ ...c, count: 0 })); // Initialize concession count to 0
+      state.concessions = concessions.map((c) => ({ ...c, count: 0 }));
     },
     increaseConcessionCount: (state, action) => {
+      // ...existing code...
       const concessionId = action.payload;
       const concession = state.concessions.find((c) => c.id === concessionId);
       if (concession) {
@@ -68,6 +69,7 @@ export const bookingSlice = createSlice({
       }
     },
     decreaseConcessionCount: (state, action) => {
+      // ...existing code...
       const concessionId = action.payload;
       const concession = state.concessions.find((c) => c.id === concessionId);
       if (concession && concession.count > 0) {
@@ -75,18 +77,22 @@ export const bookingSlice = createSlice({
       }
     },
     setUserInformation: (state, action) => {
+      // ...existing code...
       const { username, email, phone } = action.payload;
       state.user.username = username || state.user.username;
       state.user.email = email || state.user.email;
       state.user.phone = phone || state.user.phone;
     },
     increaseStep: (state) => {
+      // ...existing code...
       if (state.step < 3) state.step += 1;
     },
     decreaseStep: (state) => {
+      // ...existing code...
       if (state.step > 1) state.step -= 1;
     },
     selectSeat: (state, action) => {
+      // ...existing code...
       const seatId = action.payload;
       const seat = state.seats.find((s) => s.id === seatId);
       if (seat) {
@@ -121,6 +127,19 @@ export const bookingSlice = createSlice({
       // Use only the points needed, capped by available points
       state.pointsToUse = Math.min(Math.max(0, pointsNeeded), availablePoints);
     },
+    clearBookingDetail: (state) => {
+      state.bookingDetail = null;
+    },
+    setBookingHistoryFilter: (state, action) => {
+      // Merge new filter values with existing filter (like showtimeFilter)
+      state.bookingHistoryFilter = {
+        ...state.bookingHistoryFilter,
+        ...action.payload,
+      };
+    },
+    resetBookingHistoryFilter: (state) => {
+      state.bookingHistoryFilter = initialState.bookingHistoryFilter;
+    },
   },
 });
 
@@ -138,6 +157,9 @@ export const {
   toggleUsePoints,
   setPointsToUse,
   calculateOptimalPointsToUse,
+  clearBookingDetail,
+  setBookingHistoryFilter,
+  resetBookingHistoryFilter,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
