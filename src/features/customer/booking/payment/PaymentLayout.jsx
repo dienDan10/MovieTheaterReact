@@ -4,7 +4,7 @@ import PaymentMethod from "./PaymentMethod";
 
 function PaymentLayout() {
   return (
-    <div className="flex-[2]">
+    <div className="flex-[2] mt-14">
       <PaymentDescription />
       <UserInformation />
       <PaymentMethod />

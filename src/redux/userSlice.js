@@ -8,6 +8,7 @@ const initialState = {
     email: null,
     theaterId: null,
     role: null,
+    point: 0,
   },
 };
 
@@ -19,8 +20,8 @@ export const userSlice = createSlice({
       state.isAuthenticated = true;
     },
     doGetProfileAction: (state, action) => {
-      const { id, displayName, email, role, theaterId } = action.payload;
-      state.user = { id, name: displayName, email, role, theaterId };
+      const { id, displayName, email, role, theaterId, point } = action.payload;
+      state.user = { id, name: displayName, email, role, theaterId, point };
       state.isAuthenticated = true;
     },
     doLogoutAction: (state) => {

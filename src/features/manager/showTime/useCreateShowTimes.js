@@ -46,6 +46,7 @@ export default function useCreateShowTimes() {
         screenId: newShowtime.screenId,
         showTimes: formattedShowTimes,
         ticketPrice: newShowtime.ticketPrice,
+        vipTicketPrice: newShowtime.vipTicketPrice,
       });
     },
 

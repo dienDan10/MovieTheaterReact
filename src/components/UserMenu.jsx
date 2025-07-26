@@ -35,6 +35,9 @@ function UserMenu() {
           <span className="w-36 block text-sm text-gray-500 truncate">
             {user?.email}
           </span>
+          <span className="w-36 block text-sm text-gray-500 truncate">
+            Điểm tích lũy: {user?.point}
+          </span>
         </div>
       ),
       key: "0",

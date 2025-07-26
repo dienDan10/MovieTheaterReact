@@ -21,7 +21,9 @@ import {
   setNewShowtimeMovieId,
   setNewShowtimeScreenId,
   setNewShowtimeTicketPrice,
+  setNewShowtimeVipTicketPrice,
 } from "../../../redux/manageShowtimeSlice";
+import ShowTimeSelect from "./ShowTimeSelect";
 import useGetScreens from "./useGetScreens";
 import useGetMovies from "./useGetMovies";
 import useCreateShowTimes from "./useCreateShowTimes";
@@ -89,15 +91,16 @@ const AddShowtimeForm = () => {
   };
 
   // Handle add time slot
-  const handleAddTimeSlot = () => {
-    if (!startTime || !selectedMovie) return;
+  const handleAddTimeSlot = (timeToAdd = null) => {
+    const timeToUse = startTime || timeToAdd;
+    if (!timeToUse || !selectedMovie) return;
 
-    const endTime = calculateEndTime(startTime);
-    const formattedStartTime = startTime.format("HH:mm");
+    const endTime = calculateEndTime(timeToUse);
+    const formattedStartTime = timeToUse.format("HH:mm");
     const formattedEndTime = endTime.format("HH:mm");
 
     // Check for time conflicts with existing slots
-    if (hasTimeConflict(startTime, endTime)) {
+    if (hasTimeConflict(timeToUse, endTime)) {
       // Show error notification
       dispatch(
         notify({
@@ -117,6 +120,11 @@ const AddShowtimeForm = () => {
     );
 
     setStartTime(null);
+  };
+
+  // Handle time selection from ShowTimeSelect
+  const handleTimeSelect = (selectedTime) => {
+    handleAddTimeSlot(selectedTime);
   };
 
   // Handle form values change
@@ -139,6 +147,10 @@ const AddShowtimeForm = () => {
 
     if ("ticketPrice" in changedValues) {
       dispatch(setNewShowtimeTicketPrice(changedValues.ticketPrice));
+    }
+
+    if ("vipTicketPrice" in changedValues) {
+      dispatch(setNewShowtimeVipTicketPrice(changedValues.vipTicketPrice));
     }
   };
 
@@ -257,6 +269,25 @@ const AddShowtimeForm = () => {
             />
           </Form.Item>
 
+          {/* VIP Ticket Price */}
+          <Form.Item
+            label="VIP Ticket Price"
+            name="vipTicketPrice"
+            rules={[
+              { required: true, message: "Please enter the VIP ticket price" },
+            ]}
+          >
+            <InputNumber
+              className="w-full"
+              min={0}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              addonAfter="đ"
+            />
+          </Form.Item>
+
           {/* Start Time */}
           <Form.Item label="Start Time" name="startTime">
             <div className="flex items-center">
@@ -271,6 +302,7 @@ const AddShowtimeForm = () => {
                 type="primary"
                 icon={<PlusOutlined />}
                 className="ml-2"
+                htmlType="button"
                 onClick={handleAddTimeSlot}
                 disabled={!startTime || !selectedMovie}
               >
@@ -286,6 +318,14 @@ const AddShowtimeForm = () => {
               Movie Duration: {selectedMovie.duration} minutes
             </Text>
           </div>
+        )}
+
+        {/* Show Time Select component */}
+        {selectedMovie && (
+          <ShowTimeSelect
+            onSelectTime={handleTimeSelect}
+            selectedMovie={selectedMovie}
+          />
         )}
 
         {/* Time slots table */}
@@ -319,6 +359,7 @@ const AddShowtimeForm = () => {
               !newShowtime.screenId ||
               !newShowtime.date ||
               !newShowtime.ticketPrice ||
+              !newShowtime.vipTicketPrice ||
               newShowtime.timeSlots.length === 0
             }
           >

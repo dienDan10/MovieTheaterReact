@@ -7,6 +7,7 @@ const initialState = {
     date: null,
   },
   selectedShowtime: null,
+  selectedCustomer: null, // Add selected customer from search
   paymentId: null,
   paymentDetails: null,
 };
@@ -23,6 +24,7 @@ export const employeeBookingSlice = createSlice({
       state.paymentId = null;
       state.paymentDetails = null;
       state.selectedShowtime = null;
+      state.selectedCustomer = null;
     },
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
@@ -36,6 +38,9 @@ export const employeeBookingSlice = createSlice({
     setPaymentDetails: (state, action) => {
       state.paymentDetails = action.payload;
     },
+    setSelectedCustomer: (state, action) => {
+      state.selectedCustomer = action.payload;
+    },
   },
 });
 
@@ -46,5 +51,6 @@ export const {
   setSelectedShowtime,
   setPaymentId,
   setPaymentDetails,
+  setSelectedCustomer,
 } = employeeBookingSlice.actions;
 export default employeeBookingSlice.reducer;

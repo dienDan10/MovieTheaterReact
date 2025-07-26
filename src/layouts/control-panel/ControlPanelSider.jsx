@@ -4,6 +4,7 @@ import {
   MdAccountCircle,
   MdChair,
   MdFastfood,
+  MdOutlineDiscount,
   MdOutlinePlaylistAddCheckCircle,
   MdSpaceDashboard,
 } from "react-icons/md";
@@ -37,6 +38,7 @@ function ControlPanelSider({ collapsed }) {
     if (pathname.includes("concessions")) return "11";
     if (pathname.includes("checkin")) return "12";
     if (pathname.includes("booking")) return "13";
+    if (pathname.includes("promotions")) return "14";
   };
 
   const selectedKey = calcSelectedKey();
@@ -89,6 +91,11 @@ function ControlPanelSider({ collapsed }) {
             key: "6",
             icon: <RiMovie2AiFill />,
             label: <Link to="theaters">Theaters</Link>,
+          },
+          isAdmin && {
+            key: "14",
+            icon: <MdOutlineDiscount />,
+            label: <Link to="promotions">Promotions</Link>,
           },
           (isAdmin || isManager) && {
             key: "7",

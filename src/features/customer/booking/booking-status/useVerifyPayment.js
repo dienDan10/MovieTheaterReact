@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { verifyPayment } from "../../../../services/apiBooking";
 import { useDispatch } from "react-redux";
 import { notify } from "../../../../redux/notificationSlice";
@@ -6,6 +6,7 @@ import { SUCCESS_NOTIFICATION } from "../../../../utils/constant";
 
 export function useVerifyPayment() {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const query = new URLSearchParams(window.location.search);
   const paymentId = query.get("paymentId");
   const vnpParams = {};
@@ -25,6 +26,7 @@ export function useVerifyPayment() {
           message: "Payment verified successfully!",
         })
       );
+      queryClient.invalidateQueries(["userProfile"]);
       return data;
     },
     onError: (error) => {

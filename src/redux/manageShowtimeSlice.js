@@ -19,6 +19,7 @@ const initialState = {
     date: format(new Date(), "yyyy-MM-dd"),
     timeSlots: [], // { startTime, endTime }
     ticketPrice: 0,
+    vipTicketPrice: 0,
   },
   // Selected showtime for detail view
   selectedShowtime: null,
@@ -76,6 +77,9 @@ export const manageShowtimeSlice = createSlice({
     setNewShowtimeTicketPrice: (state, action) => {
       state.newShowtime.ticketPrice = action.payload;
     },
+    setNewShowtimeVipTicketPrice: (state, action) => {
+      state.newShowtime.vipTicketPrice = action.payload;
+    },
     addTimeSlot: (state, action) => {
       state.newShowtime.timeSlots.push(action.payload);
     },
@@ -91,6 +95,7 @@ export const manageShowtimeSlice = createSlice({
         date: format(new Date(), "yyyy-MM-dd"),
         timeSlots: [],
         ticketPrice: 0,
+        vipTicketPrice: 0,
       };
     },
 
@@ -121,6 +126,7 @@ export const {
   setNewShowtimeScreenId,
   setNewShowtimeDate,
   setNewShowtimeTicketPrice,
+  setNewShowtimeVipTicketPrice,
   addTimeSlot,
   removeTimeSlot,
   resetNewShowtime,

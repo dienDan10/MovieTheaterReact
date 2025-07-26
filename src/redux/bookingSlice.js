@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { MINIMUM_TOTAL_PRICE, POINTS_TO_VND_RATIO } from "../utils/constant";
 import { format } from "date-fns";
 const initialState = {
   step: 1,
@@ -10,6 +11,9 @@ const initialState = {
   showtime: null,
   movie: null,
   concessions: [],
+  selectedPromotion: null,
+  usePoints: false,
+  pointsToUse: 0,
   user: {
     username: null,
     email: null,
@@ -33,9 +37,17 @@ export const bookingSlice = createSlice({
       // ...existing code...
       const seatsArray = Array.isArray(action.payload) ? action.payload : [];
       state.seats = seatsArray.map((seat) => ({ isSelected: false, ...seat }));
-      const uniqueRows = [...new Set(seatsArray.map((seat) => seat.seatRow))].sort();
-      const maxColumnNumber = seatsArray.length > 0 ? Math.max(...seatsArray.map((seat) => seat.seatNumber), 0) : 0;
-      const seatColumns = Array.from({ length: maxColumnNumber }, (_, i) => i + 1);
+      const uniqueRows = [
+        ...new Set(seatsArray.map((seat) => seat.seatRow)),
+      ].sort();
+      const maxColumnNumber =
+        seatsArray.length > 0
+          ? Math.max(...seatsArray.map((seat) => seat.seatNumber), 0)
+          : 0;
+      const seatColumns = Array.from(
+        { length: maxColumnNumber },
+        (_, i) => i + 1
+      );
       state.seatRows = uniqueRows;
       state.seatColumns = seatColumns;
     },
@@ -87,6 +99,34 @@ export const bookingSlice = createSlice({
         seat.isSelected = !seat.isSelected;
       }
     },
+    setSelectedPromotion: (state, action) => {
+      state.selectedPromotion = action.payload;
+    },
+    toggleUsePoints: (state, action) => {
+      state.usePoints = action.payload;
+      if (!action.payload) {
+        state.pointsToUse = 0;
+      }
+    },
+    setPointsToUse: (state, action) => {
+      state.pointsToUse = action.payload;
+    },
+    // Calculate optimal points to use based on subtotal and promotion discount
+    calculateOptimalPointsToUse: (state, action) => {
+      const { subtotal, promotionDiscount, availablePoints } = action.payload;
+
+      // Calculate maximum allowable discount from points
+      const maxAllowableDiscount =
+        subtotal - promotionDiscount - MINIMUM_TOTAL_PRICE;
+
+      // Calculate how many points are needed for this discount
+      const pointsNeeded = Math.ceil(
+        maxAllowableDiscount / POINTS_TO_VND_RATIO
+      );
+
+      // Use only the points needed, capped by available points
+      state.pointsToUse = Math.min(Math.max(0, pointsNeeded), availablePoints);
+    },
     clearBookingDetail: (state) => {
       state.bookingDetail = null;
     },
@@ -113,6 +153,10 @@ export const {
   increaseConcessionCount,
   decreaseConcessionCount,
   setUserInformation,
+  setSelectedPromotion,
+  toggleUsePoints,
+  setPointsToUse,
+  calculateOptimalPointsToUse,
   clearBookingDetail,
   setBookingHistoryFilter,
   resetBookingHistoryFilter,

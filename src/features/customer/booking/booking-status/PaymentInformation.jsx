@@ -1,4 +1,3 @@
-import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,6 +16,10 @@ import {
 import dayjs from "dayjs";
 import { GiFilmSpool } from "react-icons/gi";
 import { IoReceiptOutline } from "react-icons/io5";
+import {
+  PROMOTION_TYPE_PERCENTAGE,
+  SEAT_TYPE_VIP,
+} from "../../../../utils/constant";
 
 function PaymentInformation() {
   const { paymentDetails } = useSelector((state) => state.bookingConfirm);
@@ -105,10 +108,17 @@ function PaymentInformation() {
                       {seats.map((seat) => (
                         <span
                           key={seat.id}
-                          className="inline-block bg-gray-200 px-2 py-1 rounded text-xs mr-2 mb-1"
+                          className={`inline-block px-2 py-1 rounded text-xs mr-2 mb-1 ${
+                            seat.seatType === SEAT_TYPE_VIP
+                              ? "bg-amber-200 text-amber-800 border border-amber-400"
+                              : "bg-gray-200 text-gray-800"
+                          }`}
                         >
                           {seat.seatRow}
                           {seat.seatNumber}
+                          {seat.seatType === "VIP" && (
+                            <span className="ml-1">★</span>
+                          )}
                         </span>
                       ))}
                     </p>
@@ -136,7 +146,7 @@ function PaymentInformation() {
                       {item.name} x{item.quantity}
                     </span>
                     <span>
-                      {(item.price * item.quantity).toLocaleString()} đ
+                      {(item.price * item.quantity).toLocaleString("vi-VN")} đ
                     </span>
                   </div>
                 ))}
@@ -183,8 +193,18 @@ function PaymentInformation() {
                     <span>
                       Seat {seat.seatRow}
                       {seat.seatNumber}
+                      {seat.seatType === SEAT_TYPE_VIP && (
+                        <span className="ml-1 text-amber-600 font-medium">
+                          ★ VIP
+                        </span>
+                      )}
                     </span>
-                    <span>{showTime.ticketPrice.toLocaleString()} đ</span>
+                    <span>
+                      {seat.seatType === SEAT_TYPE_VIP
+                        ? showTime.vipTicketPrice.toLocaleString()
+                        : showTime.ticketPrice.toLocaleString()}{" "}
+                      đ
+                    </span>
                   </div>
                 ))}
 
@@ -200,9 +220,67 @@ function PaymentInformation() {
                 ))}
 
                 <hr />
+
+                {/* Subtotal */}
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{payment.totalAmount.toLocaleString()} đ</span>
+                </div>
+
+                {/* Discount section */}
+                {payment.discountAmount > 0 && (
+                  <div className="text-red-600">
+                    {/* Promotion discount */}
+                    {paymentDetails.promotion && (
+                      <div className="flex justify-between">
+                        <span>
+                          Promotion: <br />
+                          {paymentDetails.promotion.description}
+                          {paymentDetails.promotion.discountType ===
+                          PROMOTION_TYPE_PERCENTAGE
+                            ? ` (${paymentDetails.promotion.discountValue}%)`
+                            : ""}
+                        </span>
+                        <span>
+                          -{" "}
+                          {(paymentDetails.promotion.discountType ===
+                          PROMOTION_TYPE_PERCENTAGE
+                            ? (
+                                payment.totalAmount *
+                                (paymentDetails.promotion.discountValue / 100)
+                              ).toFixed(0)
+                            : paymentDetails.promotion.discountValue
+                          ).toLocaleString()}{" "}
+                          đ
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Points used */}
+                    {payment.bonusPointsUsed > 0 && (
+                      <div className="flex justify-between">
+                        <span>
+                          Points used:{" "}
+                          {payment.bonusPointsUsed.toLocaleString()} points
+                        </span>
+                        <span>
+                          - {(payment.bonusPointsUsed * 10).toLocaleString()} đ
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Total discount */}
+                    <div className="flex justify-between font-medium">
+                      <span>Total Discount</span>
+                      <span>- {payment.discountAmount.toLocaleString()} đ</span>
+                    </div>
+                  </div>
+                )}
+
+                <hr />
                 <div className="flex justify-between font-semibold text-base">
-                  <span>Total</span>
-                  <span>{payment.amount.toLocaleString()} đ</span>
+                  <span>Final Total</span>
+                  <span>{payment.finalAmount.toLocaleString()} đ</span>
                 </div>
               </div>
             </div>

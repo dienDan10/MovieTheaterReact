@@ -40,3 +40,13 @@ export const enableSeat = async (seatId) => {
   const response = await axios.put(`/api/seats/${seatId}/enable`);
   return response.data;
 };
+
+export const setVip = async (seatId) => {
+  const response = await axios.put(`/api/seats/${seatId}/set-vip`);
+  return response.data;
+};
+
+export const setNormal = async (seatId) => {
+  const response = await axios.put(`/api/seats/${seatId}/set-normal`);
+  return response.data;
+};
